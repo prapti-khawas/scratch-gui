@@ -132,6 +132,7 @@ class Blocks extends React.Component {
         this.props.vm.addListener('targetsUpdate', this.onTargetsUpdate);
         this.props.vm.addListener('EXTENSION_ADDED', this.handleExtensionAdded);
         this.props.vm.addListener('BLOCKSINFO_UPDATE', this.handleBlocksInfoUpdate);
+        this.props.vm.addListener('BLOCK_TRANSFORM', this.handleBlocksTransformation);
     }
     detachVM () {
         this.props.vm.removeListener('SCRIPT_GLOW_ON', this.onScriptGlowOn);
@@ -143,6 +144,7 @@ class Blocks extends React.Component {
         this.props.vm.removeListener('targetsUpdate', this.onTargetsUpdate);
         this.props.vm.removeListener('EXTENSION_ADDED', this.handleExtensionAdded);
         this.props.vm.removeListener('BLOCKSINFO_UPDATE', this.handleBlocksInfoUpdate);
+        this.props.vm.removeListener('BLOCK_TRANSFORM', this.handleBlocksTransformation);
     }
     updateToolboxBlockValue (id, value) {
         const block = this.workspace
@@ -254,6 +256,12 @@ class Blocks extends React.Component {
         this.props.onRequestCloseCustomProcedures(data);
         this.workspace.refreshToolboxSelection_();
     }
+    handleBlocksTransformation (data) {
+        console.log('pass the transformation information to the workspace');
+        console.log(data);
+        // todo: this.workspace.blocksTransformer(data);
+    }
+
     render () {
         /* eslint-disable no-unused-vars */
         const {
