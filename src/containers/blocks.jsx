@@ -50,7 +50,8 @@ class Blocks extends React.Component {
             'onVisualReport',
             'onWorkspaceUpdate',
             'onWorkspaceMetricsChange',
-            'setBlocks'
+            'setBlocks',
+            'handleBlocksTransformation'
         ]);
         this.ScratchBlocks.prompt = this.handlePromptStart;
         this.state = {
@@ -259,7 +260,7 @@ class Blocks extends React.Component {
     handleBlocksTransformation (data) {
         console.log('pass the transformation information to the workspace');
         console.log(data);
-        // todo: this.workspace.blocksTransformer(data);
+        this.workspace.blockTransformer.doTransform(data);
     }
 
     render () {
