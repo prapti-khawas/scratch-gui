@@ -258,8 +258,7 @@ class Blocks extends React.Component {
         this.workspace.refreshToolboxSelection_();
     }
     handleBlocksTransformation (data) {
-        console.log('pass the transformation information to the workspace');
-        console.log(data);
+        console.log('--scratch-vm--handleBlocksTransformation');
         this.workspace.blockTransformer.doTransform(data);
     }
 
