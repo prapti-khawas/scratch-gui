@@ -1,4 +1,5 @@
 @import "../../css/colors.css";
+@import "../../css/z-index.css";
 
 .background {
     position: fixed;
@@ -6,7 +7,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 999; /* Below preview modal */
+    z-index: $z-index-loader;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -39,6 +40,18 @@
 
 .bottom-block {
     animation: bottom-slide-in 1.5s ease infinite;
+}
+
+[dir="rtl"] .top-block {
+    animation: top-slide-in-rtl 1.5s ease infinite;
+}
+
+[dir="rtl"] .middle-block {
+    animation: middle-slide-in-rtl 1.5s ease infinite;
+}
+
+[dir="rtl"] .bottom-block {
+    animation: bottom-slide-in-rtl 1.5s ease infinite;
 }
 
 @keyframes top-slide-in {
@@ -85,6 +98,66 @@
     transform: translateY(0px);
     opacity: 1;
   }
+}
+
+@keyframes top-slide-in-rtl {
+  0% {
+    transform: translateY(50px) scaleX(-1);
+    opacity: 0;
+  }
+
+  33% {
+    transform: translateY(0px) scaleX(-1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px) scaleX(-1);
+    opacity: 1;
+  }
+}
+
+@keyframes middle-slide-in-rtl {
+  0% {
+    transform: translateY(50px) scaleX(-1);
+    opacity: 0;
+  }
+
+  33% {
+    transform: translateY(50px) scaleX(-1);
+    opacity: 0;
+  }
+
+  66% {
+    transform: translateY(0px) scaleX(-1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0px) scaleX(-1);
+    opacity: 1;
+  }
+}
+
+@keyframes bottom-slide-in-rtl {
+  0% {
+    transform: translateY(50px) scaleX(-1);
+    opacity: 0;
+  }
+
+  66% {
+    transform: translateY(50px) scaleX(-1);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0px) scaleX(-1);
+    opacity: 1;
+  }
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.75rem 0;
 }
 
 .message-container-outer {

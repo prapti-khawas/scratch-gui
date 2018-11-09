@@ -10,12 +10,13 @@ const MODAL_EXTENSION_LIBRARY = 'extensionLibrary';
 const MODAL_IMPORT_INFO = 'importInfo';
 const MODAL_LOADING_PROJECT = 'loadingProject';
 const MODAL_PREVIEW_INFO = 'previewInfo';
+const MODAL_LOGIN_INFO = 'loginInfo';
+const MODAL_PRESURVEY = 'presurvey';
 const MODAL_SOUND_LIBRARY = 'soundLibrary';
 const MODAL_SPRITE_LIBRARY = 'spriteLibrary';
 const MODAL_SOUND_RECORDER = 'soundRecorder';
-
+const MODAL_CONNECTION = 'connectionModal';
 const MODAL_TIPS_LIBRARY = 'tipsLibrary';
-
 
 const initialState = {
     [MODAL_BACKDROP_LIBRARY]: false,
@@ -24,10 +25,13 @@ const initialState = {
     [MODAL_EXTENSION_LIBRARY]: false,
     [MODAL_IMPORT_INFO]: false,
     [MODAL_LOADING_PROJECT]: false,
-    [MODAL_PREVIEW_INFO]: true,
+    [MODAL_PREVIEW_INFO]: false,
+    [MODAL_LOGIN_INFO]: true,
+    [MODAL_PRESURVEY]: false,
     [MODAL_SOUND_LIBRARY]: false,
     [MODAL_SPRITE_LIBRARY]: false,
     [MODAL_SOUND_RECORDER]: false,
+    [MODAL_CONNECTION]: false,
     [MODAL_TIPS_LIBRARY]: false
 };
 
@@ -86,6 +90,14 @@ const openPreviewInfo = function () {
     analytics.pageview('/modals/preview');
     return openModal(MODAL_PREVIEW_INFO);
 };
+const openLoginInfo = function () {
+    analytics.pageview('modals/login');
+    return openModal(MODAL_LOGIN_INFO);
+};
+const openPresurvey = function () {
+    analytics.pageview('modals/presurvey');
+    return openModal(MODAL_PRESURVEY);
+};
 const openSoundLibrary = function () {
     analytics.pageview('/libraries/sounds');
     return openModal(MODAL_SOUND_LIBRARY);
@@ -97,6 +109,10 @@ const openSpriteLibrary = function () {
 const openSoundRecorder = function () {
     analytics.pageview('/modals/microphone');
     return openModal(MODAL_SOUND_RECORDER);
+};
+const openConnectionModal = function () {
+    analytics.pageview('/modals/connection');
+    return openModal(MODAL_CONNECTION);
 };
 const openTipsLibrary = function () {
     analytics.pageview('/modals/tips');
@@ -123,6 +139,12 @@ const closeLoadingProject = function () {
 const closePreviewInfo = function () {
     return closeModal(MODAL_PREVIEW_INFO);
 };
+const closeLoginInfo = function () {
+    return closeModal(MODAL_LOGIN_INFO);
+};
+const closePresurvey = function () {
+    return closeModal(MODAL_PRESURVEY);
+};
 const closeSpriteLibrary = function () {
     return closeModal(MODAL_SPRITE_LIBRARY);
 };
@@ -135,8 +157,12 @@ const closeSoundRecorder = function () {
 const closeTipsLibrary = function () {
     return closeModal(MODAL_TIPS_LIBRARY);
 };
+const closeConnectionModal = function () {
+    return closeModal(MODAL_CONNECTION);
+};
 export {
     reducer as default,
+    initialState as modalsInitialState,
     openBackdropLibrary,
     openCameraCapture,
     openCostumeLibrary,
@@ -144,10 +170,13 @@ export {
     openImportInfo,
     openLoadingProject,
     openPreviewInfo,
+    openLoginInfo,
+    openPresurvey,
     openSoundLibrary,
     openSpriteLibrary,
     openSoundRecorder,
     openTipsLibrary,
+    openConnectionModal,
     closeBackdropLibrary,
     closeCameraCapture,
     closeCostumeLibrary,
@@ -155,8 +184,11 @@ export {
     closeImportInfo,
     closeLoadingProject,
     closePreviewInfo,
+    closeLoginInfo,
+    closePresurvey,
     closeSpriteLibrary,
     closeSoundLibrary,
     closeSoundRecorder,
-    closeTipsLibrary
+    closeTipsLibrary,
+    closeConnectionModal
 };

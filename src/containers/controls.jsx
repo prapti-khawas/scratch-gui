@@ -2,43 +2,62 @@ import bindAll from 'lodash.bindall';
 import PropTypes from 'prop-types';
 import React from 'react';
 import VM from 'scratch-vm';
+import {connect} from 'react-redux';
 
 import analytics from '../lib/analytics';
 import ControlsComponent from '../components/controls/controls.jsx';
+
+import { defaultVM } from '../reducers/vm';
+import { checkCode } from '../reducers/improvable';
+
+const SERVER_URL = 'https://userdataservice.cfapps.io/'
+//const SERVER_URL = 'http://localhost:8080/'
+
+const rand = Math.floor(Math.random() * 1000000);
 
 class Controls extends React.Component {
     constructor (props) {
         super(props);
         bindAll(this, [
             'handleGreenFlagClick',
-            'handleStopAllClick',
-            'onProjectRunStart',
-            'onProjectRunStop'
+            'handleStopAllClick'
         ]);
-        this.state = {
-            projectRunning: false,
-            turbo: false
-        };
     }
     componentDidMount () {
-        this.props.vm.addListener('PROJECT_RUN_START', this.onProjectRunStart);
-        this.props.vm.addListener('PROJECT_RUN_STOP', this.onProjectRunStop);
-    }
-    componentWillUnmount () {
-        this.props.vm.removeListener('PROJECT_RUN_START', this.onProjectRunStart);
-        this.props.vm.removeListener('PROJECT_RUN_STOP', this.onProjectRunStop);
-    }
-    onProjectRunStart () {
-        this.setState({projectRunning: true});
-    }
-    onProjectRunStop () {
-        this.setState({projectRunning: false});
+        window.showMessage = false;
+        setInterval(function(){window.showMessage = true;}, 300000);
     }
     handleGreenFlagClick (e) {
         e.preventDefault();
+
+        var data = defaultVM.toJSON();
+        var emptyProject = true;
+        var project = JSON.parse(data);
+        project.targets.forEach(function(e){
+            if(JSON.stringify(e.blocks) !== JSON.stringify({})){
+                emptyProject = false;
+            }
+        });
+        if(!emptyProject && showMessage){
+            window.showMessage = false;
+            var token = sessionStorage.getItem("jwt");
+            window.projectID = (window.location.hash == "")? ((document.getElementById("projectTitle").value == "Scratch Project")? document.getElementById("projectTitle").value+rand : document.getElementById("projectTitle").value) : window.location.hash.substring(1);
+            fetch(SERVER_URL + 'save-project', {
+                method: 'POST',
+                headers: {'Accept': 'application/json', 'Content-Type':'application/json', 'Authorization': token},
+                body: JSON.stringify({username: document.getElementById("gui.menuBar.username").innerHTML, projectId: window.projectID , projectJson: data})
+            })
+              .then(res => {
+                console.log("done");
+              })
+              .catch(err => {
+                console.error(err);
+              }) 
+            checkCode();
+        }
+
         if (e.shiftKey) {
-            this.setState({turbo: !this.state.turbo});
-            this.props.vm.setTurboMode(!this.state.turbo);
+            this.props.vm.setTurboMode(!this.props.turbo);
         } else {
             this.props.vm.greenFlag();
             analytics.event({
@@ -58,13 +77,15 @@ class Controls extends React.Component {
     render () {
         const {
             vm, // eslint-disable-line no-unused-vars
+            projectRunning,
+            turbo,
             ...props
         } = this.props;
         return (
             <ControlsComponent
                 {...props}
-                active={this.state.projectRunning}
-                turbo={this.state.turbo}
+                active={projectRunning}
+                turbo={turbo}
                 onGreenFlagClick={this.handleGreenFlagClick}
                 onStopAllClick={this.handleStopAllClick}
             />
@@ -73,7 +94,16 @@ class Controls extends React.Component {
 }
 
 Controls.propTypes = {
+    projectRunning: PropTypes.bool.isRequired,
+    turbo: PropTypes.bool.isRequired,
     vm: PropTypes.instanceOf(VM)
 };
 
-export default Controls;
+const mapStateToProps = state => ({
+    projectRunning: state.scratchGui.vmStatus.running,
+    turbo: state.scratchGui.vmStatus.turbo
+});
+// no-op function to prevent dispatch prop being passed to component
+const mapDispatchToProps = () => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Controls);
