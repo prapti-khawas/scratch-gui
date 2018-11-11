@@ -9,8 +9,7 @@ const smellNames = ["LongScript","UncommunicativeName","DuplicateCode","Duplicat
 const checkCode = function () {
     clearBoxes();
     mixpanel.track("Feedback displayed",{
-        "sessionID": sessionStorage.getItem("sessionID"),
-        "userID": window.scratch_username,
+        "userID": window.userID,
         "projectID": window.projectID
     });
 

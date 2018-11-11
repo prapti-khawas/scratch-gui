@@ -34,6 +34,7 @@ const PreviewModal = ({intl, ...props}) => (
                         id="gui.customPreviewInfo.welcome"
                     />
                 </h2>
+                {/*
                 <p>
                     <FormattedMessage
                         defaultMessage="We're working on the next generation of Scratch with support for program software quality. We're excited you decided to try it!"
@@ -41,6 +42,28 @@ const PreviewModal = ({intl, ...props}) => (
                         id="gui.customPreviewInfo.invitation"
                     />
                 </p>
+                */}
+                <p>
+                    <FormattedMessage
+                        defaultMessage="This experimental version of Scratch is developed by researchers at Virginia Tech. Besides the latest visual interface, this version provides helpful tips and feedback on how you can improve your code quality."
+                        description="Invitation to try Improvable preview"
+                        id="gui.loginInfo.invitation1"
+                    />
+                </p>
+                <p>
+                    <FormattedMessage
+                        defaultMessage="To enjoy using this tool, you will need to take a short survey about your experiences with Scratch."
+                        description="Invitation to try Improvable preview"
+                        id="gui.loginInfo.invitation2"
+                    />
+                </p>
+                <p>
+                    <FormattedMessage
+                        defaultMessage="At this time, you would not be able to save your projects created with this tool to the online Scratch community. However, you can always save your projects locally to your computer’s hard drive."
+                        description="Invitation to try Improvable preview"
+                        id="gui.loginInfo.invitation3"
+                    />
+                </p> 
 
                 <Box className={styles.buttonRow}>
                     <button
@@ -83,6 +106,28 @@ const PreviewModal = ({intl, ...props}) => (
                             id="gui.previewModal.viewproject"
                         />
                     </button>
+                </Box>
+                <Box className={styles.faqLinkText}>
+                    <FormattedMessage
+                        defaultMessage="By proceeding to use the tool, you agree to provide {previewFaqLink}."
+                        description="Consent information"
+                        id="gui.loginInfo.informConsent"
+                        values={{
+                            previewFaqLink: (
+                                <a
+                                    className={styles.faqLink}
+                                    href="http://www.q4blocks.org/static/consent-form.html" 
+                                    target="_blank"
+                                >
+                                    <FormattedMessage
+                                        defaultMessage="consent"
+                                        description="link to consent terms"
+                                        id="gui.loginInfo.consentLink"
+                                    />
+                                </a>
+                            )
+                        }}
+                    />
                 </Box>
             </Box>
         </div>

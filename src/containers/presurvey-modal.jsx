@@ -34,19 +34,8 @@ class PresurveyModal extends React.Component {
                 if (event.data === 'closeQSIWindow') {
                     console.log(event);
                     const token = sessionStorage.getItem("jwt");
-                    fetch(SERVER_URL + 'updatePreSurveyCompleted', 
-                    { 
-                        method: 'POST',
-                        headers: {'Authorization': token}
-                    }
-                    ).then(res => {
-                        res.json();
-                        this.props.onDone();
-                    })
-                    .catch(err => {
-                        this.setState({open: true});
-                        console.error(err)
-                    })
+                    localStorage.setItem("survey","completed");
+                    this.props.onDone();
                 }
         }
     }
@@ -68,6 +57,7 @@ class PresurveyModal extends React.Component {
 
     componentDidMount () {
         if (this.props.onDone) window.addEventListener("message", this.handleDone);
+        if (localStorage.getItem("survey") == "completed") this.props.onDone();
     }
 
     componentWillUnmount () {
@@ -93,7 +83,6 @@ const mapDispatchToProps = dispatch => ({
     },
     onDone: () => {
         dispatch(closePresurvey());
-        dispatch(openPreviewInfo());
     }
 });
 

@@ -595,9 +595,7 @@ class MenuBar extends React.Component {
                 
                 {/* Modified account info */}
                 <div className={styles.accountInfoGroup}>
-                    <div className={classNames(styles.menuBarItem, styles.hoverable, {
-                            [styles.active]: this.props.accountMenuOpen
-                        })}
+                    <div className={classNames(styles.menuBarItem, styles.hoverable)}
                         onMouseUp={this.props.onClickAccount}
                     >
                         <div
@@ -609,28 +607,7 @@ class MenuBar extends React.Component {
                             <span id="gui.menuBar.username">
                                 {'scratch-cat' /* @todo username */}
                             </span>
-                            <img
-                                className={styles.dropdownCaretIcon}
-                                src={dropdownCaret}
-                            />
                         </div>
-                        <MenuBarMenu
-                            className={classNames(styles.menuBarMenu)}
-                            open={this.props.accountMenuOpen}
-                            place={this.props.isRtl ? 'left' : 'right'}
-                            onRequestClose={this.props.onRequestCloseAccount}
-                        >
-                            <MenuItem 
-                                isRtl={this.props.isRtl}
-                                onClick={this.props.onLogout}
-                            >
-                                <FormattedMessage
-                                    defaultMessage="Log out"
-                                    description="Menu bar item for logout"
-                                    id="gui.menuBar.logout"
-                                />
-                            </MenuItem>
-                        </MenuBarMenu>
                     </div>
                 </div>
             </Box>

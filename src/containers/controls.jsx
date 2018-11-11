@@ -45,7 +45,7 @@ class Controls extends React.Component {
             fetch(SERVER_URL + 'save-project', {
                 method: 'POST',
                 headers: {'Accept': 'application/json', 'Content-Type':'application/json', 'Authorization': token},
-                body: JSON.stringify({username: document.getElementById("gui.menuBar.username").innerHTML, projectId: window.projectID , projectJson: data})
+                body: JSON.stringify({username: window.userID, projectId: window.projectID , projectJson: data})
             })
               .then(res => {
                 console.log("done");

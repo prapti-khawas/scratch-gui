@@ -7,7 +7,8 @@ import ImportModalComponent from '../components/import-modal/import-modal.jsx';
 
 import {
     closeImportInfo,
-    openPreviewInfo
+    openPreviewInfo,
+    openPresurvey
 } from '../reducers/modals';
 
 class ImportModal extends React.Component {
@@ -106,6 +107,7 @@ const mapDispatchToProps = dispatch => ({
     },
     onViewProject: () => {
         dispatch(closeImportInfo());
+        dispatch(openPresurvey());
     }
 });
 

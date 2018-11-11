@@ -14,23 +14,23 @@
 }
 
 .modal-content {
-    margin: 100px auto;
+    margin: 5% auto;
     outline: none;
     border: .25rem solid $ui-white-transparent;
     padding: 0;
     border-radius: $space;
     user-select: none;
-    width: 500px;
-
+    width: 700px;
+    height: 560px;
     color: $text-primary;
     overflow: hidden;
 }
 
 .illustration {
     width: 100%;
-    height: 208px;
+    height: 20%;
     background-color: $motion-primary;
-    background-image: url('./welcome.png');
+    background-image: url('./welcome2.png');
     background-size: cover;
 }
 
