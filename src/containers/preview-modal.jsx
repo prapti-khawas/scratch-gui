@@ -10,7 +10,8 @@ import PreviewModalComponent from '../components/preview-modal/preview-modal.jsx
 import {
     closePreviewInfo,
     openImportInfo,
-    openPresurvey
+    openPresurvey,
+    openPostsurvey
 } from '../reducers/modals';
 
 const SERVER_URL = 'https://userdataservice.cfapps.io/'
@@ -122,7 +123,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     onTryIt: () => {
         dispatch(closePreviewInfo());
-        dispatch(openPresurvey());
+        //dispatch(openPresurvey());
     },
     onViewProject: () => {
         dispatch(closePreviewInfo());

@@ -1,57 +1,86 @@
 import { defaultVM } from './vm';
 
+const SERVER_URL = 'http://localhost:8080/'
+
 var smellType = 0;
 var sprite = 0;
 var smellNumber = -1;
 var response = null;
 const smellNames = ["LongScript","UncommunicativeName","DuplicateCode","DuplicateExpression"];
 
+const rand = Math.floor(Math.random() * 1000000);
+
 const checkCode = function () {
-    clearBoxes();
+    document.getElementById("left_button").onclick = function () {
+        document.getElementById("tweak_hints").style="display:none";
+    }
+    document.getElementById("right_button").onclick = function () {
+        nextSmell(1);
+    }
+    window.projectID = (window.location.hash == "")? ((document.getElementById("projectTitle").value == "Scratch Project")? document.getElementById("projectTitle").value+rand : document.getElementById("projectTitle").value) : window.location.hash.substring(1);
+    document.getElementById("projectTitle").value = window.projectID;
     mixpanel.track("Feedback displayed",{
         "userID": window.userID,
         "projectID": window.projectID
     });
 
-    // var oReq = new XMLHttpRequest();
-    //oReq.open("GET", "http://localhost:8080/sb3webservice/sb3analysis?ID=149974792");
-    // oReq.onload = function() {
-    //     var responseText = oReq.responseText;
-    //     Blockly.getMainWorkspace().explainHighlightBox(responseText);
-    //     console.log(responseText);
-    // };
-    // oReq.send();
-
     smellType = 0;
     sprite = 0;
     smellNumber = -1;
+
+    var data = defaultVM.toJSON();
+    var emptyProject = true;
+    var project = JSON.parse(data);
+    project.targets.forEach(function(e){
+        if(JSON.stringify(e.blocks) !== JSON.stringify({})){
+            emptyProject = false;
+        }
+    });
+    if(emptyProject){
+        return {
+            type: null,
+            menu: null
+        };
+    }
 
     var xhr = new XMLHttpRequest();
     //var url = "http://0.0.0.0:8080/analyze";
     // var url = "https://engine.q4blocks.org:8080/analyze";
     var url = "https://analyzer.cfapps.io/analyze";
     // var url = "http://0.0.0.0:8080/save-project";
-    // document.getElementById("checkcodeButton").style="display:none";
-    // document.getElementById("loadingButton").style="display:flex";
+    //document.getElementById("checkcodeButton").style="display:none";
+    document.getElementById("loading").style="display:block";
+    document.getElementById("tweak_button").style="display:none";
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     const token = sessionStorage.getItem("jwt");
     xhr.setRequestHeader("Authorization", token);
     xhr.onload = function() {
-        // document.getElementById("checkcodeButton").style="display:flex";
-        // document.getElementById("loadingButton").style="display:none";
+        document.getElementById("tweak_hints").style="display:block";
+        document.getElementById("tweak_button").style="display:block";
+        document.getElementById("loading").style="display:none";
         response = JSON.parse(xhr.responseText);
         var workspace = Blockly.getMainWorkspace();
         if(response["error"]=="Unknown block type"){
             mixpanel.track("Error Unknown block type");
-            //workspace.explainHighlightBox("Uh oh! \n Looks like you have used a block which our tool does not support. \n Don't worry, we are working on it!",0,1);
+            document.getElementById("hints_content").innerHTML = "Uh oh! <br/> Looks like you have used a block which our tool does not support. <br/> Don't worry, we are working on it!";
+            document.getElementById("blue_button").style = "display: none";
+            document.getElementById("yellow_button").innerHTML = "Okay";
+            document.getElementById("yellow_button").onclick = function() {
+                document.getElementById("tweak_hints").style="display:none";
+            };
             return {
                 type: null,
                 menu: null
             };
         } else if(response["error"]) {
             mixpanel.track("Error "+response['error']);
-            //workspace.explainHighlightBox("Uh oh! \n Looks like we are facing a problem. \n You can report the issue by emailing the below error to quality4blocks@research.cs.vt.edu \n "+response['error'],0,1);
+            document.getElementById("hints_content").innerHTML = "Uh oh! <br/> Looks like we are facing a problem. <br/> You can report the issue by emailing the below error to quality4blocks@research.cs.vt.edu";
+            document.getElementById("blue_button").style = "display: none";
+            document.getElementById("yellow_button").innerHTML = "Okay";
+            document.getElementById("yellow_button").onclick = function() {
+                document.getElementById("tweak_hints").style="display:none";
+            };
             return {
                 type: null,
                 menu: null
@@ -72,42 +101,48 @@ const checkCode = function () {
         });
         if(smellPresent==1){
             mixpanel.track("Smells Present");
-            workspace.drawBox(350,400);
-            var strEx = '<g id="doneButton" style="pointer-events: auto;cursor: pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="80" y="20"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="145" y="45">Okay</text></g>';
-            var str = '<text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="20">Hey there! </text><text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="60">That\'s great work! </text><text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="100">But guess what? This code can be made even </text><text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="120">better. Improving your code can increase its </text><text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="140">popularity and the chances that others will</text><text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="160">remix your project. </text></g>';
-            //workspace.explainHighlightBox("Hey there! \n That's great work! \n But guess what? This code can be made even better. Improving your code can improve the popularity and the chances of your project to be remixed by others. Would you like to find how?",0,1);
-            document.getElementById("options").innerHTML=strEx;
-            document.getElementById("options2").innerHTML=str;
-            document.getElementById("doneButton").onclick = function() {
-                clearBoxes();
-            };
+            document.getElementById("hints_content").innerHTML = "Hey there! <br/> That's great work! <br/> But guess what? This code can be made even better. Improving your code can increase the popularity and the chances that others will remix your project. Would you like to find how?";
+            document.getElementById("yellow_button").onclick = function() {
+                mixpanel.track("Started Refactoring");
+                //document.getElementById("tweak_hints").style="display:none";
+                nextSmell(1);
+                mixpanel.track("Finished Refactoring");
+            }
+            document.getElementById("blue_button").onclick = function() {
+                mixpanel.track("Viewed more info on Improvables");
+                window.open("https://q4blocks.org/resources/improvables","_blank","noopener noreferrer");
+            }           
         } else {
-            workspace.drawBox(350,400);
-            var strEx = '<g id="doneButton" style="pointer-events: auto;cursor: pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="80" y="20"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="145" y="45">Great!</text></g>';
-            var str = '<text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="20">Hey there! </text><text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="60">That\'s great work! </text><text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" x="30" y="100">What a perfect masterpiece!</text></g>';
-            //workspace.explainHighlightBox("Hey there! \n That's great work! \n This code is a perfect masterpiece!",0,1);
-            document.getElementById("options").innerHTML=strEx;
-            document.getElementById("options2").innerHTML=str;
-            document.getElementById("doneButton").onclick = function() {
-                clearBoxes();
+            document.getElementById("hints_content").innerHTML = "Hey there! <br/> That's great work! <br/> This code is a perfect masterpiece!";
+            document.getElementById("blue_button").style = "display: none";
+            document.getElementById("yellow_button").innerHTML = "Great!";
+            document.getElementById("yellow_button").onclick = function() {
+                document.getElementById("tweak_hints").style="display:none";
             };
         }
     };
-    var data = defaultVM.toJSON();
     xhr.send(data);
+
+    fetch(SERVER_URL + 'save-project', {
+        method: 'POST',
+        headers: {'Accept': 'application/json', 'Content-Type':'application/json', 'Authorization': token},
+        body: JSON.stringify({username: window.userID, projectId: window.projectID , projectJson: data})
+    })
+      .then(res => {
+        console.log("done");
+      })
+      .catch(err => {
+        console.error(err);
+      }) 
+
     return {
         type: null,
         menu: null
     };
 
-    // nextSmell(1);
-    // const f = Blockly.getMainWorkspace().getFlyout();
-    // f.setScrollPos(7100);
-    // f.drawHighlightBox(["`jEk@4|i[#Fk?(8x)AV.-my variable"]);
-
 };
 const clearBoxes = function () {
-    // mixpanel.track("Cleared suggestions");
+    mixpanel.track("Cleared suggestions");
     Blockly.getMainWorkspace().removeHighlightBox();
     Blockly.getMainWorkspace().getFlyout().removeHighlightBox();
     return {
@@ -144,6 +179,7 @@ const nextSmell = function(num) {
                 document.getElementsByClassName("sprite-selector_sprite_21WnR")[sprite].click();
             } else {
                 document.getElementsByClassName("sprite-selector_sprite_21WnR")[0].click();
+                document.getElementById("tweak_hints").style="display:none";
                 return;
             }
         }
@@ -184,13 +220,91 @@ const handleLongScript = function (response, workspace) {
     workspace.centerOnBlock(smell.topBlock);
     workspace.drawHighlightBox(smell.topBlock, smell.bottomBlock);
     //var str = '<g class="blocklyDraggable blocklySelected" data-shapes="c-block c-1 hat" transform="translate(0,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0, 0 a 20,20 0 0,1 20,-20 H 149.82195663452148 a 20,20 0 0,1 20,20 v 60  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-shapes="stack" transform="translate(59.58120346069336,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF4D6A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 98.24075317382812 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="43.12037658691406" transform="translate(8, 24) ">Reset&nbsp;game</text></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="21.79060173034668" transform="translate(8, 24) ">define</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,64)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 180.90317916870117 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(68.46145629882812,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><g data-argument-type="text number" data-shapes="argument round" transform="translate(136.90317916870117,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="26.230728149414062" transform="translate(8, 24) ">go&nbsp;to&nbsp;x:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.220861434936523" transform="translate(116.46145629882812, 24) ">y:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000028)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-right.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text><g class="blocklyDraggable" data-shapes="stack" data-category="control" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFAB19" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 159.59375 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(48,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">2</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.2265625" transform="translate(8, 24) ">wait</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#CF8B17"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="29.796875" transform="translate(96, 24) ">seconds</text><g class="blocklyDraggable" data-shapes="stack" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 122.24165344238281 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="55.120826721191406" transform="translate(8, 24) ">Reset&nbsp;variables</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000057)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-left.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text></g></g></g></g></g></g>';
-    var str = '<g id="divdingButton" style="cursor:pointer;"><rect height="40" width="200" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="90" y="175">See Next Improvable</text>'
-    workspace.explainHighlightBox("This code can look even better if we break it down. \n This maybe the right place to use the concept of 'Dividable Script'. \n What do you think?", 0);
-    document.getElementById('options').innerHTML=str;
-    
-    document.getElementById("divdingButton").onclick = function() {
-        workspace.removeHighlightBox();
-        nextSmell(1);
+    var str = '<g id="exampleButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="65" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="120" y="75">See How</text></g><g id="divdingButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="100" y="175">Start Dividing!</text>'
+    //workspace.explainHighlightBox("This code can look better if we break it down. \n This maybe the right place to use the concept of 'Dividable Script'. \n What do you think?", 0);
+    document.getElementById("hints_content").innerHTML = "This code can look better if we break it down. <br/> What do you think?";
+    document.getElementById("header_title").innerHTML = "Dividable Script";
+    document.getElementById("blue_button").innerHTML = "See How";
+    document.getElementById("blue_button").style = "display: block";
+    document.getElementById("yellow_button").style = "display: block";
+    document.getElementById("yellow_button").innerHTML = "Start Dividing!";
+    //document.getElementById('options').innerHTML=str;
+    document.getElementById("blue_button").onclick = function() {
+        mixpanel.track("Viewed demo Dividable Script");
+        // var strEx = '<g class="blocklyDraggable blocklySelected" data-shapes="c-block c-1 hat" transform="translate(350,200) scale(0.675)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0, 0 a 20,20 0 0,1 20,-20 H 149.82195663452148 a 20,20 0 0,1 20,20 v 60  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-shapes="stack" transform="translate(59.58120346069336,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF4D6A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 98.24075317382812 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="43.12037658691406" transform="translate(8, 24) ">Reset&nbsp;game</text></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="21.79060173034668" transform="translate(8, 24) ">define</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,64)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 180.90317916870117 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(68.46145629882812,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><g data-argument-type="text number" data-shapes="argument round" transform="translate(136.90317916870117,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="26.230728149414062" transform="translate(8, 24) ">go&nbsp;to&nbsp;x:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.220861434936523" transform="translate(116.46145629882812, 24) ">y:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000028)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-right.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text><g class="blocklyDraggable" data-shapes="stack" data-category="control" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFAB19" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 159.59375 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(48,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">2</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.2265625" transform="translate(8, 24) ">wait</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#CF8B17"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="29.796875" transform="translate(96, 24) ">seconds</text><g class="blocklyDraggable" data-shapes="stack" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 122.24165344238281 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="55.120826721191406" transform="translate(8, 24) ">Reset&nbsp;variables</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000057)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-left.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text></g></g></g></g></g></g>';
+        var strEx = '<g id="doneButton" style="pointer-events: auto;cursor: pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="180" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="245" y="175">Back</text></g>';
+        var strGif = '<g transform="translate(0,50)"><image href="https://media.giphy.com/media/22OOIdmSEZTBn70oyO/giphy.gif"></image></g>';
+        clearBoxes();
+        workspace.drawBox(500,610);
+        document.getElementById("options").innerHTML=strEx;
+        document.getElementById("options2").innerHTML=strGif;
+        document.getElementById("doneButton").onclick = function() {
+            clearBoxes();
+            handleLongScript(response,workspace);
+        };
+    };
+    document.getElementById("yellow_button").onclick = function() {
+        //while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
+        //str = '<text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="25">1. </text> <g id="createBlockButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="30"></rect><text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="65" y="25">Make a Block</text></g> <text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="70">2. Select the first and the last block to move to </text> <text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="100">new custom block </text> <text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="140">3. </text> <g id="moveBlockButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="30" y="115"></rect><text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="75" y="140">Move Blocks</text></g>';
+        str = '1. <button id="createBlockButton" style="cursor:pointer; font-family: \'Helvetica Neue\', Helvetica, sans-serif; font-weight: bold; font-size: 0.75rem; color: white; padding: 10px 30px 10px 30px; background-color: #4c97ff; border: 2px solid #4c97ff; border-radius: 5px;">Make a Block</button><br/>2. Select the first and the last block to move to new custom block <br/>3. </text> <button id="moveBlockButton" style="cursor:pointer; color: white; padding: 10px 30px 10px 30px; font-family: \'Helvetica Neue\', Helvetica, sans-serif; font-weight: bold; font-size: 0.75rem; background-color: #4c97ff; border: 2px solid #4c97ff; border-radius: 5px;">Move Blocks</button>';
+        //document.getElementById("options").innerHTML=str;
+        document.getElementById("hints_content").innerHTML=str;
+        document.getElementById("blue_button").style = "display: none";
+        document.getElementById("yellow_button").style = "display: none";
+        var newBlock = null, prevBlock = null, nextBlock = null, newBlockCall = null, newBlockId = null;
+        if(document.getElementById("createBlockButton")) document.getElementById("createBlockButton").onclick = function() {
+            var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_definition" id="'+generateRandomID()+'" x="800" y="95"><statement name="custom_block"><shadow type="procedures_prototype" id="'+generateRandomID()+'"><mutation proccode="New Block" argumentids="[]" argumentnames="[]" argumentdefaults="[]" warp="false"></mutation></shadow></statement></block> </xml>';
+            var xml = Blockly.Xml.textToDom(text);
+            newBlockId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            newBlock = workspace.getBlockById(newBlockId);
+            document.addEventListener("pointerup", storeLastClickedBlock);
+        }
+        var storeLastClickedBlock = function() {
+            if(lastClickedBlock1==null) {
+                lastClickedBlock1 = workspace.reportSelectedBlock();
+                lastClickedBlock1.setGlowBlock(true);
+            }
+            else {
+                lastClickedBlock2 = workspace.reportSelectedBlock();
+                lastClickedBlock2.setGlowBlock(true);
+                prevBlock = lastClickedBlock1.getPreviousBlock();
+                nextBlock = lastClickedBlock2.getNextBlock();
+            }
+        };
+        var substackBlocks = ["control_repeat_until","control_if","control_repeat","control_forever"];
+        if(document.getElementById("moveBlockButton")) document.getElementById("moveBlockButton").onclick = function() {
+            var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_call" id="'+generateRandomID()+'" x="280" y="257"><mutation proccode="New Block" argumentids="[]" warp="false"></mutation></block> </xml>';
+            var xml = Blockly.Xml.textToDom(text);
+            var newBlockCallId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            newBlockCall = workspace.getBlockById(newBlockCallId);
+            
+            if(newBlockCall) {
+                if(substackBlocks.includes(prevBlock.type)){
+                    prevBlock.inputList[1].connection.connect(newBlockCall.previousConnection);
+                    newBlockCall.connectToBlock(nextBlock);
+                } else if(prevBlock.type == "control_if_else"){
+                    //check if lastClickedBlock1 belongs to substack1 or substack2
+                    if(prevBlock.inputList[2].connection.targetConnection.getSourceBlock()==lastClickedBlock1){
+                        prevBlock.inputList[2].connection.connect(newBlockCall.previousConnection);
+                        newBlockCall.connectToBlock(nextBlock);
+                    } else if(prevBlock.inputList[4].connection.targetConnection.getSourceBlock()==lastClickedBlock1){
+                        prevBlock.inputList[4].connection.connect(newBlockCall.previousConnection);
+                        newBlockCall.connectToBlock(nextBlock);
+                    }
+                } else {
+                    prevBlock.connectToBlock(newBlockCall);
+                    if(nextBlock) newBlockCall.connectToBlock(nextBlock);
+                }
+            }
+
+            if(lastClickedBlock1) newBlock.connectToBlock(lastClickedBlock1)
+                document.removeEventListener("pointerup", storeLastClickedBlock);
+            lastClickedBlock1.setGlowBlock(false);
+            lastClickedBlock2.setGlowBlock(false);
+            workspace.removeHighlightBox();
+            mixpanel.track("Long Script Refactoring Done");
+            showEditMsg(workspace, newBlockId);
+        }
     }
 };
 
@@ -204,16 +318,22 @@ const handleUncommunicativeName = function (response, workspace) {
     var smell = response[smellNames[smellType]][smellNumber];
     var str="";
 
-    str='<g  id="button" style="cursor:pointer;"><rect height="40" width="200" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="100"></rect><text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="90" y="125">See Next Improvable</text></g>'
-    msg = "Can "+smell.name+" be renamed better? \n This maybe the right place to use the concept of 'Renamable Element'. \n What do you think?";
+    str='<text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold">Give another another name to this variable</text> <foreignObject width="200" height="100" y="30" x="70"> <input xmlns="http://www.w3.org/1999/xhtml" type="text" id="input" name="firstname" style="height:45px" required> </foreignObject> <g  id="button" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="100"></rect><text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="90" y="125">Rename Variable</text></g>'
+    msg = "Can "+smell.name+" be renamed better? <br/> What do you think? <br/> Give another another name to this variable <br/> <input type=\"text\" id=\"input\" name=\"firstname\" style=\"height:45px\" required>";
 
     const f = workspace.getFlyout();
-    workspace.refreshToolboxSelection_();
-    f.setScrollPos(7100);
+    f.setScrollPos(8100);
     f.drawHighlightBox([smell.varBlock]);
-    workspace.explainHighlightBox(msg, 1);
-    document.getElementById('options').innerHTML=str;
-    if(document.getElementById("button")) document.getElementById("button").onclick = function() {
+    //workspace.explainHighlightBox(msg, 1);
+    //document.getElementById('options').innerHTML=str;
+    document.getElementById("hints_content").innerHTML = msg;
+    document.getElementById("header_title").innerHTML = "Renamable Element";
+    document.getElementById("blue_button").style = "display: none";
+    document.getElementById("yellow_button").innerHTML = "Rename";
+    document.getElementById("yellow_button").onclick = function() {
+        var newName = document.getElementById("input").value;
+        workspace.variableMap_.renameVariableById(smell.varBlock, newName);
+        workspace.refreshToolboxSelection_();
         workspace.removeHighlightBox();
         workspace.getFlyout().removeHighlightBox();
         mixpanel.track("Uncommunicative Name Refactoring Done");
@@ -234,21 +354,68 @@ const handleDuplicateCode = function (response, workspace) {
     }
     var newBlocks = [];
     //var str = '<g class="blocklyDraggable blocklySelected" data-shapes="c-block c-1 hat" transform="translate(0,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0, 0 a 20,20 0 0,1 20,-20 H 149.82195663452148 a 20,20 0 0,1 20,20 v 60  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-shapes="stack" transform="translate(59.58120346069336,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF4D6A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 98.24075317382812 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="43.12037658691406" transform="translate(8, 24) ">Reset&nbsp;game</text></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="21.79060173034668" transform="translate(8, 24) ">define</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,64)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 180.90317916870117 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(68.46145629882812,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><g data-argument-type="text number" data-shapes="argument round" transform="translate(136.90317916870117,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="26.230728149414062" transform="translate(8, 24) ">go&nbsp;to&nbsp;x:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.220861434936523" transform="translate(116.46145629882812, 24) ">y:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000028)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-right.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text><g class="blocklyDraggable" data-shapes="stack" data-category="control" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFAB19" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 159.59375 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(48,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">2</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.2265625" transform="translate(8, 24) ">wait</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#CF8B17"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="29.796875" transform="translate(96, 24) ">seconds</text><g class="blocklyDraggable" data-shapes="stack" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 122.24165344238281 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="55.120826721191406" transform="translate(8, 24) ">Reset&nbsp;variables</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000057)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-left.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text></g></g></g></g></g></g>';
-    workspace.explainHighlightBox("This code can look even better if we removed all the repeated code and instead used a single block for it. \n This maybe the right place to use the concept of 'Reusable Repeats'. \n What do you think?", 0);
-    //while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
-    var str = '<g id="navigateButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="70" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="95" y="75">See Next Repeat</text><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="200" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="90" y="175">See Next Improvable</text></g></g>'
-    document.getElementById("options").innerHTML=str;
-    var eachRepeat = 1;
-    document.getElementById("navigateButton").onclick = function() {
-        workspace.centerOnBlock(smell.groups[eachRepeat].topBlock);
-        eachRepeat++;
-        if(eachRepeat==smell.noOfGroups) eachRepeat = 0;
-    };
-    document.getElementById("reusingButton").onclick = function() {
-        workspace.removeHighlightBox();
-        workspace.getFlyout().removeHighlightBox();
-        nextSmell(1);
-    };
+    var str = '<g id="exampleButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="65" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="120" y="75">See How</text></g><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="100" y="175">Start Re-Using!</text>'
+    //workspace.explainHighlightBox("This code can look better if we removed all the repeated code and instead used a single block for it. \n This maybe the right place to use the concept of 'Reusable Repeats'. \n What do you think?", 0);
+    document.getElementById("hints_content").innerHTML="This code can look better if we removed all the repeated code and instead used a single block for it. <br/> What do you think?";
+    document.getElementById("header_title").innerHTML = "Reusable Repeats";
+    document.getElementById("blue_button").innerHTML = "See How";
+    document.getElementById("blue_button").style = "display: block";
+    document.getElementById("yellow_button").style = "display: block";
+    document.getElementById("yellow_button").innerHTML = "Start Re-using!";
+    document.getElementById("yellow_button").onclick = function() {
+        //while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
+        str = '<g id="navigateButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="70" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="95" y="75">See Next Repeat</text><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="250" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="40" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="65" y="175">Make a Block and Re-Use!</text></g></g>'
+        //document.getElementById("options").innerHTML=str;
+        document.getElementById("blue_button").innerHTML = "See next repeat";
+        document.getElementById("yellow_button").innerHTML = "Make a Block & Re-use";
+        var eachRepeat = 1;
+        document.getElementById("blue_button").onclick = function() {
+            workspace.centerOnBlock(smell.groups[eachRepeat].topBlock);
+            eachRepeat++;
+            if(eachRepeat==smell.noOfGroups) eachRepeat = 0;
+        };
+        document.getElementById("yellow_button").onclick = function() {
+            //custom block generation
+            var topBlock = workspace.getBlockById(smell.groups[0].topBlock);
+            var prevBlock = topBlock.getPreviousBlock();
+            var bottomBlock = workspace.getBlockById(smell.groups[0].bottomBlock).getNextBlock();
+
+            var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_definition" id="'+generateRandomID()+'" x="800" y="95"><statement name="custom_block"><shadow type="procedures_prototype" id="'+generateRandomID()+'"><mutation proccode="New Block" argumentids="[]" argumentnames="[]" argumentdefaults="[]" warp="false"></mutation></shadow></statement></block> </xml>';
+            var xml = Blockly.Xml.textToDom(text);
+            var newBlockId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            var newBlock = workspace.getBlockById(newBlockId);
+            var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_call" id="'+generateRandomID()+'" x="280" y="257"><mutation proccode="New Block" argumentids="[]" warp="false"></mutation></block> </xml>';
+            var xml = Blockly.Xml.textToDom(text);
+            var newBlockCallId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            newBlocks.push(newBlockCallId);
+            var newBlockCall = workspace.getBlockById(newBlockCallId);
+            if(newBlockCall) {
+                prevBlock.connectToBlock(newBlockCall);
+                if(bottomBlock) newBlockCall.connectToBlock(bottomBlock);
+            }
+            newBlock.connectToBlock(topBlock);
+
+            for(i=1;i<smell.noOfGroups;i++) {
+                var topBlock = workspace.getBlockById(smell.groups[i].topBlock);
+                var prevBlock = topBlock.getPreviousBlock();
+                var bottomBlock = workspace.getBlockById(smell.groups[i].bottomBlock).getNextBlock();
+                var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_call" id="'+generateRandomID()+'" x="280" y="257"><mutation proccode="New Block" argumentids="[]" warp="false"></mutation></block> </xml>';
+                var xml = Blockly.Xml.textToDom(text);
+                var newBlockCallId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+                newBlocks.push(newBlockCallId);
+                var newBlockCall = workspace.getBlockById(newBlockCallId);
+                if(newBlockCall) {
+                    if(prevBlock) prevBlock.connectToBlock(newBlockCall);
+                    if(bottomBlock) newBlockCall.connectToBlock(bottomBlock);
+                    topBlock.dispose();
+                } 
+            }
+            workspace.removeHighlightBox();
+            workspace.getFlyout().removeHighlightBox();
+            mixpanel.track("Duplicate Script Refactoring Done");
+            showEditMsg(workspace, newBlockId, 0, 1, newBlocks);
+        };
+    } 
 }
 
 const handleDuplicateExpr = function (response, workspace) {
@@ -256,37 +423,139 @@ const handleDuplicateExpr = function (response, workspace) {
         nextSmell(1);
         return;
     }
-    var booleanOps = ["operator_lt","operator_gt","operator_equals","operator_and","operator_or","operator_not"];
     var smell = response[smellNames[smellType]][sprite][smellNumber];
-    var exprb = workspace.getBlockById(smell.groups[0].exprBlock);
-    if (!booleanOps.includes(exprb.type)) {
-        workspace.centerOnBlock(smell.groups[0].exprBlock);
-        var i=0;
-        for(i=0;i<smell.noOfGroups;i++) {
-            workspace.drawHighlightBox(smell.groups[i].exprBlock);
-        }
-        //var str = '<g class="blocklyDraggable blocklySelected" data-shapes="c-block c-1 hat" transform="translate(0,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0, 0 a 20,20 0 0,1 20,-20 H 149.82195663452148 a 20,20 0 0,1 20,20 v 60  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-shapes="stack" transform="translate(59.58120346069336,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF4D6A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 98.24075317382812 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="43.12037658691406" transform="translate(8, 24) ">Reset&nbsp;game</text></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="21.79060173034668" transform="translate(8, 24) ">define</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,64)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 180.90317916870117 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(68.46145629882812,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><g data-argument-type="text number" data-shapes="argument round" transform="translate(136.90317916870117,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="26.230728149414062" transform="translate(8, 24) ">go&nbsp;to&nbsp;x:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.220861434936523" transform="translate(116.46145629882812, 24) ">y:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000028)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-right.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text><g class="blocklyDraggable" data-shapes="stack" data-category="control" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFAB19" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 159.59375 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(48,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">2</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.2265625" transform="translate(8, 24) ">wait</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#CF8B17"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="29.796875" transform="translate(96, 24) ">seconds</text><g class="blocklyDraggable" data-shapes="stack" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 122.24165344238281 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="55.120826721191406" transform="translate(8, 24) ">Reset&nbsp;variables</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000057)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-left.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text></g></g></g></g></g></g>';
-        workspace.explainHighlightBox("This code can look better if we removed all the repeated expressions and instead used a single variable for it. \n This maybe the right place to use the concept of 'Reusable Expressions'. \n What do you think?", 0);
-        document.getElementById('options').innerHTML=str;
-        //while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
-        var str = '<g id="navigateButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="70" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="95" y="75">See Next Repeat</text><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="200" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="90" y="175">See Next Improvable</text></g></g>'
-        document.getElementById("options").innerHTML=str;
+    workspace.centerOnBlock(smell.groups[0].exprBlock);
+    var i=0, newVariables = [];
+    for(i=0;i<smell.noOfGroups;i++) {
+        workspace.drawHighlightBox(smell.groups[i].exprBlock);
+    }
+    //var str = '<g class="blocklyDraggable blocklySelected" data-shapes="c-block c-1 hat" transform="translate(0,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0, 0 a 20,20 0 0,1 20,-20 H 149.82195663452148 a 20,20 0 0,1 20,20 v 60  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-shapes="stack" transform="translate(59.58120346069336,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF4D6A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 98.24075317382812 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="43.12037658691406" transform="translate(8, 24) ">Reset&nbsp;game</text></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="21.79060173034668" transform="translate(8, 24) ">define</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,64)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 180.90317916870117 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(68.46145629882812,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><g data-argument-type="text number" data-shapes="argument round" transform="translate(136.90317916870117,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="26.230728149414062" transform="translate(8, 24) ">go&nbsp;to&nbsp;x:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.220861434936523" transform="translate(116.46145629882812, 24) ">y:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000028)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-right.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text><g class="blocklyDraggable" data-shapes="stack" data-category="control" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFAB19" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 159.59375 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(48,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">2</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.2265625" transform="translate(8, 24) ">wait</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#CF8B17"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="29.796875" transform="translate(96, 24) ">seconds</text><g class="blocklyDraggable" data-shapes="stack" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 122.24165344238281 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="55.120826721191406" transform="translate(8, 24) ">Reset&nbsp;variables</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000057)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-left.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text></g></g></g></g></g></g>';
+    var str = '<g id="exampleButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="65" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="120" y="75">See How</text></g><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="100" y="175">Start Re-Using!</text>'
+    //workspace.explainHighlightBox("This code can look better if we removed all the repeated expressions and instead used a single variable for it. \n This maybe the right place to use the concept of 'Reusable Expressions'. \n What do you think?", 0);
+    document.getElementById("hints_content").innerHTML="This code can look better if we removed all the repeated expressions and instead used a single variable for it. <br/> What do you think?";
+    document.getElementById("header_title").innerHTML = "Reusable Expressions";
+    document.getElementById("blue_button").innerHTML = "See How";
+    document.getElementById("blue_button").style = "display: block";
+    document.getElementById("yellow_button").style = "display: block";
+    document.getElementById("yellow_button").innerHTML = "Start Re-using!";
+    //document.getElementById('options').innerHTML=str;
+    document.getElementById("yellow_button").onclick = function() {
+        // while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
+        // str = '<g id="navigateButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="65" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="95" y="75">See Next Repeat</text><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="255" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="40" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="60" y="175">Make a Variable and Re-Use!</text></g></g>'
+        // document.getElementById("options").innerHTML=str;
+        document.getElementById("blue_button").innerHTML = "See next repeat";
+        document.getElementById("yellow_button").innerHTML = "Make a Variable & Re-use";
         var eachRepeat = 1;
-        document.getElementById("navigateButton").onclick = function() {
+        document.getElementById("blue_button").onclick = function() {
             workspace.centerOnBlock(smell.groups[eachRepeat].exprBlock);
             eachRepeat++;
             if(eachRepeat==smell.noOfGroups) eachRepeat = 0;
         };
-        var varNum = 1;
-        document.getElementById("reusingButton").onclick = function() {
+        document.getElementById("yellow_button").onclick = function() {
+            //custom variable generation
+            var exprBlock = workspace.getBlockById(smell.groups[0].exprBlock);
+            var parentBlock = exprBlock.getParent();
+            var prevBlock = parentBlock.getPreviousBlock();
+
+            var newVariableId = generateRandomID();
+            var newVariableName = generateVariableName(exprBlock.type);
+            var text = '<xml xmlns="http://www.w3.org/1999/xhtml"><variables></variables><block type="data_setvariableto" id="'+generateRandomID()+'" gap="20"> <field name="VARIABLE" id="'+newVariableId+'" variabletype="">'+newVariableName+'</field> <value name="VALUE"> <shadow type="text"> <field name="TEXT">0</field> </shadow> </value> </block></xml>';
+            var xml = Blockly.Xml.textToDom(text);
+            var newBlockId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            var newBlock = workspace.getBlockById(newBlockId);
+            newBlock.inputList[0].connection.connect(exprBlock.outputConnection);
+
+            if(prevBlock) prevBlock.connectToBlock(newBlock);
+            var superParent = parentBlock;
+            while(superParent.category_.search("operators")>=0 || superParent.category_.search("sensing")>=0) {superParent=superParent.getParent();}
+            newBlock.connectToBlock(superParent);
+            
+            var text = '<xml xmlns="http://www.w3.org/1999/xhtml"><variables></variables><block type="data_variable" id="'+generateRandomID()+'" x="481" y="88"><field name="VARIABLE" id="'+newVariableId+'" variabletype="">'+newVariableName+'</field></block></xml>';
+            var xml = Blockly.Xml.textToDom(text);
+            var newVarId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            newVariables.push(newVarId);
+            var newVarCall = workspace.getBlockById(newVarId);
+            parentBlock.inputList[0].connection.connect(newVarCall.outputConnection);
+
+
+            for(i=1;i<smell.noOfGroups;i++) {
+                var exprBlock = workspace.getBlockById(smell.groups[i].exprBlock);
+                var parentBlock = exprBlock.getParent();
+                exprBlock.dispose();
+                var text = '<xml xmlns="http://www.w3.org/1999/xhtml"><variables></variables><block type="data_variable" id="'+generateRandomID()+'" x="481" y="88"><field name="VARIABLE" id="'+newVariableId+'" variabletype="">'+newVariableName+'</field></block></xml>';
+                var xml = Blockly.Xml.textToDom(text);
+                var newVarId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+                var newVarCall = workspace.getBlockById(newVarId);
+                newVariables.push(newVarId);
+                parentBlock.inputList[0].connection.connect(newVarCall.outputConnection);
+            }
             workspace.removeHighlightBox();
             workspace.getFlyout().removeHighlightBox();
-            nextSmell(1);
+            workspace.toolbox_.refreshSelection();
+            mixpanel.track("Duplicate Expression Refactoring Done");
+            showEditMsg(workspace, newBlockId, 1, 1, newVariables);
         };
     } 
 }
 
+const showEditMsg = function (workspace, blockId, isVariable=0, isDuplicate=0, newBlocks=null) {
+    workspace.centerOnBlock(blockId);
+    var type = "block";
+    var strToAddPar = "Add block parameters if required."
+    if(isVariable) {
+        type = "variable";
+        strToAddPar = "";
+    }
+    //workspace.explainHighlightBox("You can now edit this "+type+" as you wish. Don't forget to give a meaningful name for the "+type+"! "+strToAddPar+" \n Click 'Done' to proceed to the next smell.", isVariable);
+    var str='You can now edit this '+type+' as you wish. Don\'t forget to give a meaningful name for the '+type+'! '+strToAddPar+' <br/> Click \'Done\' to proceed to the next smell.';
+    document.getElementById("hints_content").innerHTML=str;
+    document.getElementById("yellow_button").style = "display: block";
+    document.getElementById("yellow_button").innerHTML = "Done";
+    if(isDuplicate) {
+        document.getElementById("blue_button").style = "display: block";
+        document.getElementById("blue_button").innerHTML = "See next modified repeat";
+        //str = '<g id="navigateButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="65" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="95" y="75">See Next Repeat</text><g id="button" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="65" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="135" y="175">Done!</text></g></g>'
+    }
+    document.getElementById("yellow_button").onclick = function() {
+        workspace.removeHighlightBox();
+        workspace.getFlyout().removeHighlightBox();
+        nextSmell(1);
+    };
+    var eachRepeat = 0;
+    document.getElementById("blue_button").onclick = function() {
+        mixpanel.track("Navigated duplicates");
+        workspace.centerOnBlock(newBlocks[eachRepeat]);
+        eachRepeat++;
+        if(eachRepeat==newBlocks.length) eachRepeat = 0;
+    };
+}
 
+
+const generateRandomID = function () {
+    var s = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@%^*(:;{[,=.";
+    return Array(20).join().split(',').map(function() { return s.charAt(Math.floor(Math.random() * s.length)); }).join('');
+};
+
+const generateVariableName = function (opcode) {
+    switch (opcode){
+        case "operator_add": return "sum";
+        case "operator_subtract": return "difference";
+        case "operator_multiply": return "product";
+        case "operator_divide": return "result";
+        case "operator_random": return "randomNumber";
+        case "operator_lt": return "isLessThan";
+        case "operator_gt": return "isGreaterThan";
+        case "operator_equals": return "isEqual";
+        case "operator_and": return "andResult";
+        case "operator_or": return "orResult";
+        case "operator_not": return "notResult";
+        case "operator_join": return "joinedWord";
+        case "operator_letter_of": return "letter";
+        case "operator_mod": return "result";
+        case "operator_round": return "roundResult";
+        default: return "result";
+    }
+};
 
 export {
     checkCode,

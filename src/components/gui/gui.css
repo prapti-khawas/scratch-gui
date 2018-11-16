@@ -43,6 +43,111 @@
     flex-direction: column;
 }
 
+.hints-wrapper {
+    width: 500px; 
+    height: fit-content; 
+    position: absolute; 
+    z-index: 100; 
+    border: 2px solid #4c97ff; 
+    border-radius: 10px; 
+    -moz-border-radius: 15px;
+    display: none;
+    top: 55px;
+}
+
+.hints-header {
+    background-color: #4c97ff;
+    cursor: move;
+    border-radius: 8px 9px 0px 0px;
+    position: absolute;
+    width: 497px;
+}
+
+.hints-title {
+    color: #e5f0ff;
+    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    font-weight: bold;
+    font-size:0.95rem;
+    text-align: center;
+    margin: 10px;
+    float: left;
+    width: 286px;
+}
+
+.hints-body {
+    height: fit-content; 
+    background-color: white; 
+    position: initial; 
+    border-radius: 9px;
+}
+
+.hints-content {
+    color: hsla(225, 15%, 40%, 1);
+    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    font-weight: bold;
+    font-size:0.95rem;
+    text-align: center;
+    padding-top: 50px;
+}
+
+.left-button {
+    float:  left;
+    border:  2px solid #4c97ff;
+    background-color:  #4c97ff;
+    color:  whitesmoke;
+    padding: 10px 25px 10px 25px;
+    margin-top:  2px;
+    cursor: pointer;
+}
+
+.left-button:hover {
+    background-color: #3373cc;
+    border:  2px solid #3373cc;
+}
+
+.right-button {
+    float:  right;
+    border:  2px solid #4c97ff;
+    background-color:  #4c97ff;
+    color:  whitesmoke;
+    padding: 10px 25px 10px 25px;
+    margin-top:  2px;
+    cursor: pointer;
+}
+
+.right-button:hover {
+    background-color: #3373cc;
+    border:  2px solid #3373cc;
+}
+
+.hints-button-wrapper {
+    justify-content: center;
+    display:  flex;
+}
+
+.hints-button button {
+    margin: 15px; 
+    padding: 10px 30px 10px 30px; 
+    width: 250px; 
+    font-family: 'Helvetica Neue', Helvetica, sans-serif; 
+    font-weight: bold; 
+    font-size: 0.75rem; 
+    color: white; 
+    border-radius: 5px; 
+    cursor: pointer;
+}
+
+.hints-button button.blue-button {
+    background-color: #4c97ff; 
+    border: 2px solid #4c97ff;
+}
+
+.hints-button button.yellow-button {
+    background-color: #ffb300; 
+    border: 2px solid #ffb300;
+}
+
+
 .tab-list {
     height: $stage-menu-height;
     width: 250px; /* Match width of the toolbox */

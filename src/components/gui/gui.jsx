@@ -26,6 +26,7 @@ import Backpack from '../../containers/backpack.jsx';
 import PreviewModal from '../../containers/preview-modal.jsx';
 import LoginModal from '../../containers/login-modal.jsx';      
 import PresurveyModal from '../../containers/presurvey-modal.jsx';
+import PostsurveyModal from '../../containers/postsurvey-modal.jsx';
 import ImportModal from '../../containers/import-modal.jsx';
 import WebGlModal from '../../containers/webgl-modal.jsx';
 import TipsLibrary from '../../containers/tips-library.jsx';
@@ -78,6 +79,7 @@ const GUIComponent = props => {
         importInfoVisible,
         loginInfoVisible,       
         presurveyVisible,
+        postsurveyVisible,
         intl,
         isPlayerOnly,
         isRtl,
@@ -148,6 +150,9 @@ const GUIComponent = props => {
                 ) : null}
                 {presurveyVisible ? (
                     <PresurveyModal />
+                ) : null}
+                {postsurveyVisible ? (
+                    <PostsurveyModal />
                 ) : null}
                 {previewInfoVisible ? (
                     <PreviewModal />
@@ -322,6 +327,20 @@ const GUIComponent = props => {
                                 />
                             </Box>
                         </Box>
+                        <Box id="tweak_hints" className={styles.hintsWrapper}>
+                            <Box id="tweak_hints_header" className={styles.hintsHeader}>
+                                <button id="left_button" className={styles.leftButton}>Close</button>
+                                <p id="header_title" className={styles.hintsTitle}>...</p>
+                                <button id="right_button" className={styles.rightButton}>Next</button>
+                            </Box>
+                            <Box id="hints_body" className={styles.hintsBody}>
+                                <p id="hints_content" className={styles.hintsContent}>Hey there! <br/> That's great work! <br/> But guess what? This code can be made even better. Improving your code can increase the popularity and the chances that others will remix your project. Would you like to find how?</p>
+                                <Box className={classNames(styles.hintsButton, styles.hintsButtonWrapper)}>
+                                    <button id="blue_button" className={styles.blueButton}>Learn about Improvables</button>
+                                    <button id="yellow_button" className={styles.yellowButton}>Start Tweaking!</button>
+                                </Box>
+                            </Box>
+                        </Box>
                     </Box>
                 </Box>
                 <DragLayer />
@@ -353,6 +372,7 @@ GUIComponent.propTypes = {
     importInfoVisible: PropTypes.bool,
     loginInfoVisible: PropTypes.bool,       
     presurveyVisible: PropTypes.bool,
+    postsurveyVisible: PropTypes.bool,
     intl: intlShape.isRequired,
     isPlayerOnly: PropTypes.bool,
     isRtl: PropTypes.bool,

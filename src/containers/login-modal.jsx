@@ -252,7 +252,7 @@ const mapDispatchToProps = dispatch => ({
     },
     onSuccessSignup: () => {
         dispatch(closeLoginInfo());
-        dispatch(openPresurvey());
+        //dispatch(openPresurvey());
     }
 });
 

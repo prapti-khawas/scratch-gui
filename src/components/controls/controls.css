@@ -1,3 +1,13 @@
 .controls-container {
     display: flex;
 }
+
+.tweak-button {
+    height: 32px;
+    padding: 5px;
+    width:  32px;
+}
+
+.tweak-button:hover {
+    transform: scale(1.2);
+}

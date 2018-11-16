@@ -18,6 +18,8 @@ import {
     deactivateColorPicker
 } from '../reducers/color-picker';
 
+import {openPostsurvey} from '../reducers/modals';
+
 const colorPickerRadius = 20;
 const dragThreshold = 3; // Same as the block drag threshold
 
@@ -60,6 +62,7 @@ class Stage extends React.Component {
             this.renderer = new Renderer(this.canvas);
             this.props.vm.attachRenderer(this.renderer);
         }
+        this.addExitListener = this.addExitListener.bind(this);
         this.props.vm.attachV2SVGAdapter(new V2SVGAdapter());
         this.props.vm.attachV2BitmapAdapter(new V2BitmapAdapter());
         this.props.vm.setVideoProvider(new VideoProvider());
@@ -68,6 +71,7 @@ class Stage extends React.Component {
         this.attachRectEvents();
         this.attachMouseEvents(this.canvas);
         this.updateRect();
+        this.addExitListener();
         this.props.vm.runtime.addListener('QUESTION', this.questionListener);
     }
     shouldComponentUpdate (nextProps, nextState) {
@@ -144,6 +148,24 @@ class Stage extends React.Component {
             (nativeSize[0] / this.rect.width) * (x - (this.rect.width / 2)),
             (nativeSize[1] / this.rect.height) * (y - (this.rect.height / 2))
         ];
+    }
+    addExitListener () {
+        document.body.addEventListener("mousemove", function(event) {
+            //Check if we are in the top area of the page.
+            if(event.pageY < 20) {
+                //if (localStorage.getItem("survey") == null) this.props.postSurveyDispatch();
+            }
+        });
+        window.onmousemove =  (e) => {
+            //Check if we are in the top area of the page.
+            if(e.pageY < 20) {
+                if (localStorage.getItem("survey") == null) this.props.postSurveyDispatch();
+            }
+        };
+        window.onbeforeunload =  (e) => {
+            e.returnValue = '';
+            //if (localStorage.getItem("survey") == null) this.props.postSurveyDispatch();
+        };
     }
     getColorInfo (x, y) {
         return {
@@ -394,6 +416,7 @@ Stage.propTypes = {
     onDeactivateColorPicker: PropTypes.func,
     stageSize: PropTypes.oneOf(Object.keys(STAGE_DISPLAY_SIZES)).isRequired,
     useEditorDragStyle: PropTypes.bool,
+    postSurveyDispatch: PropTypes.func,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
@@ -411,6 +434,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     onActivateColorPicker: () => dispatch(activateColorPicker()),
+    postSurveyDispatch: () => dispatch(openPostsurvey()),
     onDeactivateColorPicker: color => dispatch(deactivateColorPicker(color))
 });
 

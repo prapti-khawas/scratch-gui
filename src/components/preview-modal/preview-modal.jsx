@@ -52,7 +52,7 @@ const PreviewModal = ({intl, ...props}) => (
                 </p>
                 <p>
                     <FormattedMessage
-                        defaultMessage="To enjoy using this tool, you will need to take a short survey about your experiences with Scratch."
+                        defaultMessage="At the end of using this tool, you will be asked to take a short survey about your experiences with Scratch."
                         description="Invitation to try Improvable preview"
                         id="gui.loginInfo.invitation2"
                     />

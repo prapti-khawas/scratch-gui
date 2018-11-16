@@ -69,7 +69,9 @@ import remixIcon from './icon--remix.svg';
 import dropdownCaret from './dropdown-caret.svg';
 import languageIcon from '../language-selector/language-icon.svg';
 
-import scratchLogo from './scratch-logo.svg';
+//import scratchLogo from './scratch-logo.svg';
+import scratchLogo from './tweak-logo.png';
+import loadingIcon from './white_loading.gif';
 
 const ariaMessages = defineMessages({
     language: {
@@ -488,6 +490,7 @@ class MenuBar extends React.Component {
                             />
                         </MenuBarItemTooltip>
                     </div>
+                    {/*
                     <div className={classNames(styles.menuBarItem)}>
                         {this.props.canShare ? shareButton : (
                             this.props.showComingSoon ? (
@@ -534,9 +537,11 @@ class MenuBar extends React.Component {
                             </MenuBarItemTooltip>
                         ) : [])}
                     </div>
+                    */}
                 </div>
                 {/* comment: new item for checking added */}
-                {/* <div className={classNames(styles.menuBarItem, styles.customButton)}>
+                {/*
+                <div className={classNames(styles.menuBarItem, styles.customButton)}>
                     <Button
                         className={styles.checkcodeButton}
                         onClick={this.props.onCheckCode}
@@ -559,6 +564,7 @@ class MenuBar extends React.Component {
                             id="gui.menuBar.loading"
                         />
                     </Button>
+                    
                     <Button
                         className={styles.communityButton}
                         onClick={this.props.onClear}
@@ -589,11 +595,14 @@ class MenuBar extends React.Component {
                             id="gui.menuBar.nextSmell"
                         />
                     </Button>
-                </div> */}
+                    
+                </div> 
+                */}
                 {/* comment: new item for checking ends here */}
 
                 
                 {/* Modified account info */}
+                {/*
                 <div className={styles.accountInfoGroup}>
                     <div className={classNames(styles.menuBarItem, styles.hoverable)}
                         onMouseUp={this.props.onClickAccount}
@@ -605,11 +614,12 @@ class MenuBar extends React.Component {
                                 src={profileIcon}
                             />
                             <span id="gui.menuBar.username">
-                                {'scratch-cat' /* @todo username */}
+                                {'scratch-cat' /* @todo username * /}
                             </span>
                         </div>
                     </div>
                 </div>
+                */}
             </Box>
         );
     }

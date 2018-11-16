@@ -29,33 +29,6 @@ class Controls extends React.Component {
     }
     handleGreenFlagClick (e) {
         e.preventDefault();
-
-        var data = defaultVM.toJSON();
-        var emptyProject = true;
-        var project = JSON.parse(data);
-        project.targets.forEach(function(e){
-            if(JSON.stringify(e.blocks) !== JSON.stringify({})){
-                emptyProject = false;
-            }
-        });
-        if(!emptyProject && showMessage){
-            window.showMessage = false;
-            var token = sessionStorage.getItem("jwt");
-            window.projectID = (window.location.hash == "")? ((document.getElementById("projectTitle").value == "Scratch Project")? document.getElementById("projectTitle").value+rand : document.getElementById("projectTitle").value) : window.location.hash.substring(1);
-            fetch(SERVER_URL + 'save-project', {
-                method: 'POST',
-                headers: {'Accept': 'application/json', 'Content-Type':'application/json', 'Authorization': token},
-                body: JSON.stringify({username: window.userID, projectId: window.projectID , projectJson: data})
-            })
-              .then(res => {
-                console.log("done");
-              })
-              .catch(err => {
-                console.error(err);
-              }) 
-            checkCode();
-        }
-
         if (e.shiftKey) {
             this.props.vm.setTurboMode(!this.props.turbo);
         } else {

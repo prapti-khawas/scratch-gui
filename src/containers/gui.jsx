@@ -22,7 +22,8 @@ import {
 
 import {
     closeCostumeLibrary,
-    closeBackdropLibrary
+    closeBackdropLibrary,
+    openPostsurvey
 } from '../reducers/modals';
 
 import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
@@ -47,6 +48,8 @@ class GUI extends React.Component {
     componentDidMount () {
         this.setReduxTitle(this.props.projectTitle);
         this.props.onStorageInit(storage);
+        this.addDragToHints();
+
     }
     componentDidUpdate (prevProps) {
         if (this.props.projectId !== prevProps.projectId && this.props.projectId !== null) {
@@ -54,6 +57,7 @@ class GUI extends React.Component {
         }
         if (this.props.projectTitle !== prevProps.projectTitle) {
             this.setReduxTitle(this.props.projectTitle);
+            this.addDragToHints();
         }
     }
     setReduxTitle (newTitle) {
@@ -63,6 +67,48 @@ class GUI extends React.Component {
             );
         } else {
             this.props.onUpdateReduxProjectTitle(newTitle);
+        }
+    }
+    addDragToHints () {
+        document.getElementById("loading").style = "display:none";
+        var elmnt = document.getElementById("tweak_hints");
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (document.getElementById(elmnt.id + "_header")) {
+            // if present, the header is where you move the DIV from:
+            document.getElementById(elmnt.id + "_header").onmousedown = dragMouseDown;
+        } else {
+            // otherwise, move the DIV from anywhere inside the DIV:
+            elmnt.onmousedown = dragMouseDown;
+        }
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            elmnt.style.top = (Math.min(Math.max(elmnt.offsetTop - pos2, 50),window.innerHeight-250)) + "px";
+            elmnt.style.left = (Math.min(Math.max(elmnt.offsetLeft - pos1, 0),window.innerWidth-510)) + "px";
+        }
+
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
         }
     }
     render () {
@@ -123,6 +169,7 @@ GUI.propTypes = {
     previewInfoVisible: PropTypes.bool,
     loginInfoVisible: PropTypes.bool,
     presurveyVisible: PropTypes.bool,
+    postsurveyVisible: PropTypes.bool,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     projectTitle: PropTypes.string,
@@ -152,9 +199,10 @@ const mapStateToProps = (state, ownProps) => {
         isRtl: state.locales.isRtl,
         isShowingProject: getIsShowingProject(loadingState),
         loadingStateVisible: state.scratchGui.modals.loadingProject,
-        previewInfoVisible: state.scratchGui.modals.previewInfo && !ownProps.hideIntro,
+        previewInfoVisible: state.scratchGui.modals.previewInfo, // && !ownProps.hideIntro,
         loginInfoVisible: state.scratchGui.modals.loginInfo,
         presurveyVisible: state.scratchGui.modals.presurvey,
+        postsurveyVisible: state.scratchGui.modals.postsurvey,
         projectId: state.scratchGui.projectState.projectId,
         targetIsStage: (
             state.scratchGui.targets.stage &&
