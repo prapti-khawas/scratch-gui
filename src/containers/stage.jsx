@@ -150,22 +150,13 @@ class Stage extends React.Component {
         ];
     }
     addExitListener () {
-        document.body.addEventListener("mousemove", function(event) {
-            //Check if we are in the top area of the page.
-            if(event.pageY < 20) {
-                //if (localStorage.getItem("survey") == null) this.props.postSurveyDispatch();
-            }
-        });
         window.onmousemove =  (e) => {
             //Check if we are in the top area of the page.
             if(e.pageY < 20) {
                 if (localStorage.getItem("survey") == null) this.props.postSurveyDispatch();
             }
         };
-        window.onbeforeunload =  (e) => {
-            e.returnValue = '';
-            //if (localStorage.getItem("survey") == null) this.props.postSurveyDispatch();
-        };
+       
     }
     getColorInfo (x, y) {
         return {

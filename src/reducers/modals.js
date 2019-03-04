@@ -13,6 +13,7 @@ const MODAL_PREVIEW_INFO = 'previewInfo';
 const MODAL_LOGIN_INFO = 'loginInfo';
 const MODAL_PRESURVEY = 'presurvey';
 const MODAL_POSTSURVEY = 'postsurvey';
+const MODAL_TUTORIAL = 'tutorial';
 const MODAL_SOUND_LIBRARY = 'soundLibrary';
 const MODAL_SPRITE_LIBRARY = 'spriteLibrary';
 const MODAL_SOUND_RECORDER = 'soundRecorder';
@@ -30,6 +31,7 @@ const initialState = {
     [MODAL_LOGIN_INFO]: false,
     [MODAL_PRESURVEY]: false,
     [MODAL_POSTSURVEY]: false,
+    [MODAL_TUTORIAL]: false,
     [MODAL_SOUND_LIBRARY]: false,
     [MODAL_SPRITE_LIBRARY]: false,
     [MODAL_SOUND_RECORDER]: false,
@@ -100,6 +102,10 @@ const openPresurvey = function () {
     analytics.pageview('modals/presurvey');
     return openModal(MODAL_PRESURVEY);
 };
+const openTutorial = function () {
+    analytics.pageview('modals/tutorial');
+    return openModal(MODAL_TUTORIAL);
+};
 const openPostsurvey = function () {
     analytics.pageview('modals/postsurvey');
     return openModal(MODAL_POSTSURVEY);
@@ -154,6 +160,9 @@ const closePresurvey = function () {
 const closePostsurvey = function () {
     return closeModal(MODAL_POSTSURVEY);
 };
+const closeTutorial = function () {
+    return closeModal(MODAL_TUTORIAL);
+};
 const closeSpriteLibrary = function () {
     return closeModal(MODAL_SPRITE_LIBRARY);
 };
@@ -182,6 +191,7 @@ export {
     openLoginInfo,
     openPresurvey,
     openPostsurvey,
+    openTutorial,
     openSoundLibrary,
     openSpriteLibrary,
     openSoundRecorder,
@@ -197,6 +207,7 @@ export {
     closeLoginInfo,
     closePresurvey,
     closePostsurvey,
+    closeTutorial,
     closeSpriteLibrary,
     closeSoundLibrary,
     closeSoundRecorder,

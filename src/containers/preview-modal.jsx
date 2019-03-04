@@ -83,7 +83,7 @@ class PreviewModal extends React.Component {
     handleCancel () {
         const projectLink = document.createElement('a');
         document.body.appendChild(projectLink);
-        projectLink.href = `#217520988`;
+        projectLink.href = `#235615969`;
         projectLink.click();
         document.body.removeChild(projectLink);
         this.props.onTryIt();
@@ -123,7 +123,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
     onTryIt: () => {
         dispatch(closePreviewInfo());
-        //dispatch(openPresurvey());
+        dispatch(openPresurvey());
     },
     onViewProject: () => {
         dispatch(closePreviewInfo());

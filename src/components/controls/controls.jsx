@@ -7,12 +7,7 @@ import GreenFlag from '../green-flag/green-flag.jsx';
 import StopAll from '../stop-all/stop-all.jsx';
 import TurboMode from '../turbo-mode/turbo-mode.jsx';
 
-import tweakIcon from './icon--spanner.png';
-import loadingIcon from './white_loading.gif';
-
 import styles from './controls.css';
-
-import {checkCode} from '../../reducers/improvable';
 
 const messages = defineMessages({
     goTitle: {
@@ -56,23 +51,6 @@ const Controls = function (props) {
                 active={active}
                 title={intl.formatMessage(messages.stopTitle)}
                 onClick={onStopAllClick}
-            />
-            <img
-                id="tweak_button"
-                className={styles.tweakButton}
-                draggable={false}
-                src={tweakIcon}
-                title={intl.formatMessage(messages.tweakTitle)}
-                onClick={checkCode}
-                {...componentProps}
-            />
-            <img
-                id="loading"
-                className={styles.tweakButton}
-                draggable={false}
-                src={loadingIcon}
-                onClick={onStopAllClick}
-                {...componentProps}
             />
             {turbo ? (
                 <TurboMode />

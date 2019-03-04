@@ -45,14 +45,14 @@ const PreviewModal = ({intl, ...props}) => (
                 */}
                 <p>
                     <FormattedMessage
-                        defaultMessage="This experimental version of Scratch is developed by researchers at Virginia Tech. Besides the latest visual interface, this version provides helpful tips and feedback on how you can improve your code quality."
+                        defaultMessage="Tweak is an experimental version of Scratch developed by researchers at Virginia Tech. Besides the latest visual interface, this version provides helpful tips and feedback on how you can improve your code quality."
                         description="Invitation to try Improvable preview"
                         id="gui.loginInfo.invitation1"
                     />
                 </p>
                 <p>
                     <FormattedMessage
-                        defaultMessage="At the end of using this tool, you will be asked to take a short survey about your experiences with Scratch."
+                        defaultMessage="At the beginning and end of using this tool, you will be asked to take a short survey about your experiences with Scratch and this tool."
                         description="Invitation to try Improvable preview"
                         id="gui.loginInfo.invitation2"
                     />

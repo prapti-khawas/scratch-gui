@@ -26,6 +26,7 @@ import {
     openPostsurvey
 } from '../reducers/modals';
 
+
 import FontLoaderHOC from '../lib/font-loader-hoc.jsx';
 import LocalizationHOC from '../lib/localization-hoc.jsx';
 import ProjectFetcherHOC from '../lib/project-fetcher-hoc.jsx';
@@ -170,6 +171,7 @@ GUI.propTypes = {
     loginInfoVisible: PropTypes.bool,
     presurveyVisible: PropTypes.bool,
     postsurveyVisible: PropTypes.bool,
+    tutorialVisible: PropTypes.bool,
     projectHost: PropTypes.string,
     projectId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     projectTitle: PropTypes.string,
@@ -203,6 +205,7 @@ const mapStateToProps = (state, ownProps) => {
         loginInfoVisible: state.scratchGui.modals.loginInfo,
         presurveyVisible: state.scratchGui.modals.presurvey,
         postsurveyVisible: state.scratchGui.modals.postsurvey,
+        tutorialVisible: state.scratchGui.modals.tutorial,
         projectId: state.scratchGui.projectState.projectId,
         targetIsStage: (
             state.scratchGui.targets.stage &&

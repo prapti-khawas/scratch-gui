@@ -1,6 +1,7 @@
 import { defaultVM } from './vm';
 
-const SERVER_URL = 'http://localhost:8080/'
+const SERVER_URL = 'https://userdataservice.cfapps.io/'
+//const SERVER_URL = 'http://localhost:8080/'
 
 var smellType = 0;
 var sprite = 0;
@@ -13,6 +14,7 @@ const rand = Math.floor(Math.random() * 1000000);
 const checkCode = function () {
     document.getElementById("left_button").onclick = function () {
         document.getElementById("tweak_hints").style="display:none";
+        clearBoxes();
     }
     document.getElementById("right_button").onclick = function () {
         nextSmell(1);
@@ -75,7 +77,7 @@ const checkCode = function () {
             };
         } else if(response["error"]) {
             mixpanel.track("Error "+response['error']);
-            document.getElementById("hints_content").innerHTML = "Uh oh! <br/> Looks like we are facing a problem. <br/> You can report the issue by emailing the below error to quality4blocks@research.cs.vt.edu";
+            document.getElementById("hints_content").innerHTML = "Uh oh! <br/> Looks like we are facing a problem. <br/> You can report the issue by emailing the project ID or file (.sb3 format) to quality4blocks@research.cs.vt.edu";
             document.getElementById("blue_button").style = "display: none";
             document.getElementById("yellow_button").innerHTML = "Okay";
             document.getElementById("yellow_button").onclick = function() {
@@ -102,6 +104,11 @@ const checkCode = function () {
         if(smellPresent==1){
             mixpanel.track("Smells Present");
             document.getElementById("hints_content").innerHTML = "Hey there! <br/> That's great work! <br/> But guess what? This code can be made even better. Improving your code can increase the popularity and the chances that others will remix your project. Would you like to find how?";
+            document.getElementById("blue_button").style = "display: block";
+            document.getElementById("yellow_button").style = "display: block";
+            document.getElementById("blue_button").innerHTML = "Learn about Improvables";
+            document.getElementById("yellow_button").innerHTML = "Start Tweaking!";
+            document.getElementById("header_title").innerHTML = "...";
             document.getElementById("yellow_button").onclick = function() {
                 mixpanel.track("Started Refactoring");
                 //document.getElementById("tweak_hints").style="display:none";
@@ -110,7 +117,7 @@ const checkCode = function () {
             }
             document.getElementById("blue_button").onclick = function() {
                 mixpanel.track("Viewed more info on Improvables");
-                window.open("https://q4blocks.org/resources/improvables","_blank","noopener noreferrer");
+                window.open("https://www.q4blocks.org/static/info.html","_blank","noopener noreferrer");
             }           
         } else {
             document.getElementById("hints_content").innerHTML = "Hey there! <br/> That's great work! <br/> This code is a perfect masterpiece!";
@@ -186,8 +193,8 @@ const nextSmell = function(num) {
     }
     
     var workspace = Blockly.getMainWorkspace();
-    workspace.removeHighlightBox();
-    workspace.getFlyout().removeHighlightBox();
+    //workspace.removeHighlightBox();
+    //workspace.getFlyout().removeHighlightBox();
 
     switch(smellNames[smellType]){
         case "LongScript":
@@ -215,6 +222,7 @@ const handleLongScript = function (response, workspace) {
         nextSmell(1);
         return;
     }
+    var refactRandom = Math.floor(Math.random() * 1000000);
     var lastClickedBlock1, lastClickedBlock2;
     var smell = response[smellNames[smellType]][sprite][smellNumber];
     workspace.centerOnBlock(smell.topBlock);
@@ -232,27 +240,34 @@ const handleLongScript = function (response, workspace) {
     document.getElementById("blue_button").onclick = function() {
         mixpanel.track("Viewed demo Dividable Script");
         // var strEx = '<g class="blocklyDraggable blocklySelected" data-shapes="c-block c-1 hat" transform="translate(350,200) scale(0.675)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0, 0 a 20,20 0 0,1 20,-20 H 149.82195663452148 a 20,20 0 0,1 20,20 v 60  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-shapes="stack" transform="translate(59.58120346069336,0)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF4D6A" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 98.24075317382812 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="43.12037658691406" transform="translate(8, 24) ">Reset&nbsp;game</text></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="21.79060173034668" transform="translate(8, 24) ">define</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,64)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 180.90317916870117 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(68.46145629882812,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><g data-argument-type="text number" data-shapes="argument round" transform="translate(136.90317916870117,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">0</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="26.230728149414062" transform="translate(8, 24) ">go&nbsp;to&nbsp;x:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="6.220861434936523" transform="translate(116.46145629882812, 24) ">y:</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000028)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-right.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text><g class="blocklyDraggable" data-shapes="stack" data-category="control" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFAB19" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 159.59375 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(48,8)"><path class="blocklyPath blocklyBlockBackground" stroke="#CF8B17" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">2</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="14.2265625" transform="translate(8, 24) ">wait</text><path class="blocklyPath" style="visibility: hidden" d="" fill="#CF8B17"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="29.796875" transform="translate(96, 24) ">seconds</text><g class="blocklyDraggable" data-shapes="stack" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#FF3355" fill="#FF6680" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 122.24165344238281 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="55.120826721191406" transform="translate(8, 24) ">Reset&nbsp;variables</text><g class="blocklyDraggable" data-shapes="stack" data-category="motion" transform="translate(0,48)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#4C97FF" fill-opacity="1" d="m 0,4 A 4,4 0 0,1 4,0 H 12 c 2,0 3,1 4,2 l 4,4 c 1,1 2,2 4,2 h 12 c 2,0 3,-1 4,-2 l 4,-4 c 1,-1 2,-2 4,-2 H 185.3660068511963 a 4,4 0 0,1 4,4 v 40  a 4,4 0 0,1 -4,4 H 48   c -2,0 -3,1 -4,2 l -4,4 c -1,1 -2,2 -4,2 h -12 c -2,0 -3,-1 -4,-2 l -4,-4 c -1,-1 -2,-2 -4,-2 H 4 a 4,4 0 0,1 -4,-4 z"></path><g data-argument-type="text number" data-shapes="argument round" transform="translate(75.56236839294434,8.000000000000057)"><path class="blocklyPath blocklyBlockBackground" stroke="#3373CC" fill="#FFFFFF" fill-opacity="1" d="m 0,0 m 16,0 H 24 a 16 16 0 0 1 0 32 H 16 a 16 16 0 0 1 0 -32 z"></path><g class="blocklyEditableText" transform="translate(8, 0) " style="cursor: text;"><text class="blocklyText" x="12" y="18" dominant-baseline="middle" dy="0" text-anchor="middle">15</text></g></g><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="13.781184196472168" transform="translate(8, 24) ">turn</text><g transform="translate(43.562368392944336, 12) "><image height="24px" width="24px" xlink:href="./static/blocks-media/rotate-left.svg"></image></g><path class="blocklyPath" style="visibility: hidden" d="" fill="#3373CC"></path><text class="blocklyText" y="2" text-anchor="middle" dominant-baseline="middle" dy="0" x="28.901819229125977" transform="translate(123.56236839294434, 24) ">degrees</text></g></g></g></g></g></g>';
-        var strEx = '<g id="doneButton" style="pointer-events: auto;cursor: pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="180" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="245" y="175">Back</text></g>';
-        var strGif = '<g transform="translate(0,50)"><image href="https://media.giphy.com/media/22OOIdmSEZTBn70oyO/giphy.gif"></image></g>';
-        clearBoxes();
-        workspace.drawBox(500,610);
-        document.getElementById("options").innerHTML=strEx;
-        document.getElementById("options2").innerHTML=strGif;
-        document.getElementById("doneButton").onclick = function() {
+        //var strEx = '<g id="doneButton" style="pointer-events: auto;cursor: pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="180" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="245" y="175">Back</text></g>';
+        //var strGif = '<g transform="translate(0,50)"><image href="https://media.giphy.com/media/22OOIdmSEZTBn70oyO/giphy.gif"></image></g>';
+        //clearBoxes();
+        str = '<img src="../static/long-script.gif" alt="Dividable script demo" style="width: 400px;">';
+        document.getElementById("hints_content").innerHTML=str;
+        document.getElementById("blue_button").style = "display: none";
+        document.getElementById("yellow_button").style = "display: block";
+        document.getElementById("yellow_button").innerHTML = "Back";
+        //workspace.drawBox(500,610);
+        //document.getElementById("options").innerHTML=strEx;
+        //document.getElementById("options2").innerHTML=strGif;
+        document.getElementById("yellow_button").onclick = function() {
             clearBoxes();
             handleLongScript(response,workspace);
         };
     };
     document.getElementById("yellow_button").onclick = function() {
+        clearBoxes();
         //while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
         //str = '<text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="25">1. </text> <g id="createBlockButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="30"></rect><text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="65" y="25">Make a Block</text></g> <text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="70">2. Select the first and the last block to move to </text> <text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="100">new custom block </text> <text style="fill: black;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold;font-size:0.95rem;" y="140">3. </text> <g id="moveBlockButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="30" y="115"></rect><text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="75" y="140">Move Blocks</text></g>';
-        str = '1. <button id="createBlockButton" style="cursor:pointer; font-family: \'Helvetica Neue\', Helvetica, sans-serif; font-weight: bold; font-size: 0.75rem; color: white; padding: 10px 30px 10px 30px; background-color: #4c97ff; border: 2px solid #4c97ff; border-radius: 5px;">Make a Block</button><br/>2. Select the first and the last block to move to new custom block <br/>3. </text> <button id="moveBlockButton" style="cursor:pointer; color: white; padding: 10px 30px 10px 30px; font-family: \'Helvetica Neue\', Helvetica, sans-serif; font-weight: bold; font-size: 0.75rem; background-color: #4c97ff; border: 2px solid #4c97ff; border-radius: 5px;">Move Blocks</button>';
+        str = '1. <button id="createBlockButton" style="cursor:pointer; font-family: \'Helvetica Neue\', Helvetica, sans-serif; font-weight: bold; font-size: 0.75rem; color: white; padding: 10px 30px 10px 30px; background-color: #4c97ff; border: 2px solid #4c97ff; border-radius: 5px;">Make a Block</button><br/><br/>2. Select the first and the last block to move to new custom block <br/><br/>3. </text> <button id="moveBlockButton" style="cursor:pointer; color: white; padding: 10px 30px 10px 30px; font-family: \'Helvetica Neue\', Helvetica, sans-serif; font-weight: bold; font-size: 0.75rem; background-color: #4c97ff; border: 2px solid #4c97ff; border-radius: 5px;">Move Blocks</button>';
         //document.getElementById("options").innerHTML=str;
         document.getElementById("hints_content").innerHTML=str;
         document.getElementById("blue_button").style = "display: none";
         document.getElementById("yellow_button").style = "display: none";
         var newBlock = null, prevBlock = null, nextBlock = null, newBlockCall = null, newBlockId = null;
         if(document.getElementById("createBlockButton")) document.getElementById("createBlockButton").onclick = function() {
+            Blockly.setGroup("refactor"+refactRandom);
             var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_definition" id="'+generateRandomID()+'" x="800" y="95"><statement name="custom_block"><shadow type="procedures_prototype" id="'+generateRandomID()+'"><mutation proccode="New Block" argumentids="[]" argumentnames="[]" argumentdefaults="[]" warp="false"></mutation></shadow></statement></block> </xml>';
             var xml = Blockly.Xml.textToDom(text);
             newBlockId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
@@ -260,6 +275,7 @@ const handleLongScript = function (response, workspace) {
             document.addEventListener("pointerup", storeLastClickedBlock);
         }
         var storeLastClickedBlock = function() {
+            Blockly.setGroup("refactor"+refactRandom);
             if(lastClickedBlock1==null) {
                 lastClickedBlock1 = workspace.reportSelectedBlock();
                 lastClickedBlock1.setGlowBlock(true);
@@ -273,35 +289,41 @@ const handleLongScript = function (response, workspace) {
         };
         var substackBlocks = ["control_repeat_until","control_if","control_repeat","control_forever"];
         if(document.getElementById("moveBlockButton")) document.getElementById("moveBlockButton").onclick = function() {
+            Blockly.setGroup("refactor"+refactRandom);
             var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_call" id="'+generateRandomID()+'" x="280" y="257"><mutation proccode="New Block" argumentids="[]" warp="false"></mutation></block> </xml>';
             var xml = Blockly.Xml.textToDom(text);
             var newBlockCallId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
             newBlockCall = workspace.getBlockById(newBlockCallId);
+            Blockly.setGroup("refactor"+refactRandom);
             
             if(newBlockCall) {
                 if(substackBlocks.includes(prevBlock.type)){
-                    prevBlock.inputList[1].connection.connect(newBlockCall.previousConnection);
-                    newBlockCall.connectToBlock(nextBlock);
+                    if(prevBlock.inputList[1].connection) prevBlock.inputList[1].connection.connect(newBlockCall.previousConnection);
+                    else if(prevBlock.inputList[2].connection) prevBlock.inputList[2].connection.connect(newBlockCall.previousConnection);
+                    if(nextBlock) newBlockCall.connectToBlock(nextBlock);
                 } else if(prevBlock.type == "control_if_else"){
                     //check if lastClickedBlock1 belongs to substack1 or substack2
                     if(prevBlock.inputList[2].connection.targetConnection.getSourceBlock()==lastClickedBlock1){
                         prevBlock.inputList[2].connection.connect(newBlockCall.previousConnection);
-                        newBlockCall.connectToBlock(nextBlock);
+                        if(nextBlock) newBlockCall.connectToBlock(nextBlock);
                     } else if(prevBlock.inputList[4].connection.targetConnection.getSourceBlock()==lastClickedBlock1){
                         prevBlock.inputList[4].connection.connect(newBlockCall.previousConnection);
-                        newBlockCall.connectToBlock(nextBlock);
+                        if(nextBlock) newBlockCall.connectToBlock(nextBlock);
                     }
                 } else {
                     prevBlock.connectToBlock(newBlockCall);
                     if(nextBlock) newBlockCall.connectToBlock(nextBlock);
                 }
             }
-
+            Blockly.setGroup("refactor"+refactRandom);
             if(lastClickedBlock1) newBlock.connectToBlock(lastClickedBlock1)
                 document.removeEventListener("pointerup", storeLastClickedBlock);
             lastClickedBlock1.setGlowBlock(false);
             lastClickedBlock2.setGlowBlock(false);
+            Blockly.setGroup(false);
             workspace.removeHighlightBox();
+            workspace.cleanUp();
+            workspace.refreshToolboxSelection_();
             mixpanel.track("Long Script Refactoring Done");
             showEditMsg(workspace, newBlockId);
         }
@@ -329,6 +351,7 @@ const handleUncommunicativeName = function (response, workspace) {
     document.getElementById("hints_content").innerHTML = msg;
     document.getElementById("header_title").innerHTML = "Renamable Element";
     document.getElementById("blue_button").style = "display: none";
+    document.getElementById("yellow_button").style = "display: block";
     document.getElementById("yellow_button").innerHTML = "Rename";
     document.getElementById("yellow_button").onclick = function() {
         var newName = document.getElementById("input").value;
@@ -346,6 +369,7 @@ const handleDuplicateCode = function (response, workspace) {
         nextSmell(1);
         return;
     }
+    var refactRandom = Math.floor(Math.random() * 1000000);
     var smell = response[smellNames[smellType]][sprite][smellNumber];
     workspace.centerOnBlock(smell.groups[0].topBlock);
     var i=0;
@@ -359,13 +383,14 @@ const handleDuplicateCode = function (response, workspace) {
     document.getElementById("hints_content").innerHTML="This code can look better if we removed all the repeated code and instead used a single block for it. <br/> What do you think?";
     document.getElementById("header_title").innerHTML = "Reusable Repeats";
     document.getElementById("blue_button").innerHTML = "See How";
-    document.getElementById("blue_button").style = "display: block";
+    document.getElementById("blue_button").style = "display: none";
     document.getElementById("yellow_button").style = "display: block";
     document.getElementById("yellow_button").innerHTML = "Start Re-using!";
     document.getElementById("yellow_button").onclick = function() {
         //while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
         str = '<g id="navigateButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="70" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="95" y="75">See Next Repeat</text><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="250" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="40" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="65" y="175">Make a Block and Re-Use!</text></g></g>'
         //document.getElementById("options").innerHTML=str;
+        document.getElementById("blue_button").style = "display: block";
         document.getElementById("blue_button").innerHTML = "See next repeat";
         document.getElementById("yellow_button").innerHTML = "Make a Block & Re-use";
         var eachRepeat = 1;
@@ -376,6 +401,7 @@ const handleDuplicateCode = function (response, workspace) {
         };
         document.getElementById("yellow_button").onclick = function() {
             //custom block generation
+            Blockly.setGroup("refactor"+refactRandom);
             var topBlock = workspace.getBlockById(smell.groups[0].topBlock);
             var prevBlock = topBlock.getPreviousBlock();
             var bottomBlock = workspace.getBlockById(smell.groups[0].bottomBlock).getNextBlock();
@@ -383,19 +409,22 @@ const handleDuplicateCode = function (response, workspace) {
             var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_definition" id="'+generateRandomID()+'" x="800" y="95"><statement name="custom_block"><shadow type="procedures_prototype" id="'+generateRandomID()+'"><mutation proccode="New Block" argumentids="[]" argumentnames="[]" argumentdefaults="[]" warp="false"></mutation></shadow></statement></block> </xml>';
             var xml = Blockly.Xml.textToDom(text);
             var newBlockId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            Blockly.setGroup("refactor"+refactRandom);
             var newBlock = workspace.getBlockById(newBlockId);
             var text = '<xml xmlns="http://www.w3.org/1999/xhtml"> <variables></variables> <block type="procedures_call" id="'+generateRandomID()+'" x="280" y="257"><mutation proccode="New Block" argumentids="[]" warp="false"></mutation></block> </xml>';
             var xml = Blockly.Xml.textToDom(text);
             var newBlockCallId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
             newBlocks.push(newBlockCallId);
             var newBlockCall = workspace.getBlockById(newBlockCallId);
+            Blockly.setGroup("refactor"+refactRandom);
             if(newBlockCall) {
-                prevBlock.connectToBlock(newBlockCall);
+                if(prevBlock) prevBlock.connectToBlock(newBlockCall);
                 if(bottomBlock) newBlockCall.connectToBlock(bottomBlock);
             }
-            newBlock.connectToBlock(topBlock);
+            if(topBlock) newBlock.connectToBlock(topBlock);
 
             for(i=1;i<smell.noOfGroups;i++) {
+                Blockly.setGroup("refactor"+refactRandom);
                 var topBlock = workspace.getBlockById(smell.groups[i].topBlock);
                 var prevBlock = topBlock.getPreviousBlock();
                 var bottomBlock = workspace.getBlockById(smell.groups[i].bottomBlock).getNextBlock();
@@ -412,6 +441,9 @@ const handleDuplicateCode = function (response, workspace) {
             }
             workspace.removeHighlightBox();
             workspace.getFlyout().removeHighlightBox();
+            workspace.cleanUp();
+            Blockly.setGroup(false);
+            workspace.refreshToolboxSelection_();
             mixpanel.track("Duplicate Script Refactoring Done");
             showEditMsg(workspace, newBlockId, 0, 1, newBlocks);
         };
@@ -423,6 +455,7 @@ const handleDuplicateExpr = function (response, workspace) {
         nextSmell(1);
         return;
     }
+    var refactRandom = Math.floor(Math.random() * 1000000);
     var smell = response[smellNames[smellType]][sprite][smellNumber];
     workspace.centerOnBlock(smell.groups[0].exprBlock);
     var i=0, newVariables = [];
@@ -435,7 +468,7 @@ const handleDuplicateExpr = function (response, workspace) {
     document.getElementById("hints_content").innerHTML="This code can look better if we removed all the repeated expressions and instead used a single variable for it. <br/> What do you think?";
     document.getElementById("header_title").innerHTML = "Reusable Expressions";
     document.getElementById("blue_button").innerHTML = "See How";
-    document.getElementById("blue_button").style = "display: block";
+    document.getElementById("blue_button").style = "display: none";
     document.getElementById("yellow_button").style = "display: block";
     document.getElementById("yellow_button").innerHTML = "Start Re-using!";
     //document.getElementById('options').innerHTML=str;
@@ -443,6 +476,7 @@ const handleDuplicateExpr = function (response, workspace) {
         // while(document.getElementById('options').childNodes.length!=0) {document.getElementById('options').childNodes.forEach(function(each){each.remove();})}
         // str = '<g id="navigateButton" style="cursor:pointer;"><rect height="40" width="180" rx="5" ry="5" style="fill: rgb(243, 139, 45);stroke-width:5;stroke: rgb(243, 139, 45);" x="65" y="50"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="95" y="75">See Next Repeat</text><g id="reusingButton" style="cursor:pointer;"><rect height="40" width="255" rx="5" ry="5" style="fill: rgb(77, 150, 253);stroke-width:5;stroke:rgb(77, 150, 253);" x="40" y="150"> </rect> <text style="fill: white;font-family: \'Helvetica Neue\', Helvetica, sans-serif;font-weight: bold" x="60" y="175">Make a Variable and Re-Use!</text></g></g>'
         // document.getElementById("options").innerHTML=str;
+        document.getElementById("blue_button").style = "display: block";
         document.getElementById("blue_button").innerHTML = "See next repeat";
         document.getElementById("yellow_button").innerHTML = "Make a Variable & Re-use";
         var eachRepeat = 1;
@@ -453,6 +487,7 @@ const handleDuplicateExpr = function (response, workspace) {
         };
         document.getElementById("yellow_button").onclick = function() {
             //custom variable generation
+            Blockly.setGroup("refactor"+refactRandom);
             var exprBlock = workspace.getBlockById(smell.groups[0].exprBlock);
             var parentBlock = exprBlock.getParent();
             var prevBlock = parentBlock.getPreviousBlock();
@@ -462,14 +497,16 @@ const handleDuplicateExpr = function (response, workspace) {
             var text = '<xml xmlns="http://www.w3.org/1999/xhtml"><variables></variables><block type="data_setvariableto" id="'+generateRandomID()+'" gap="20"> <field name="VARIABLE" id="'+newVariableId+'" variabletype="">'+newVariableName+'</field> <value name="VALUE"> <shadow type="text"> <field name="TEXT">0</field> </shadow> </value> </block></xml>';
             var xml = Blockly.Xml.textToDom(text);
             var newBlockId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
+            Blockly.setGroup("refactor"+refactRandom);
             var newBlock = workspace.getBlockById(newBlockId);
             newBlock.inputList[0].connection.connect(exprBlock.outputConnection);
 
             if(prevBlock) prevBlock.connectToBlock(newBlock);
             var superParent = parentBlock;
+            Blockly.setGroup("refactor"+refactRandom);
             while(superParent.category_.search("operators")>=0 || superParent.category_.search("sensing")>=0) {superParent=superParent.getParent();}
-            newBlock.connectToBlock(superParent);
-            
+            if(superParent) newBlock.connectToBlock(superParent);
+            Blockly.setGroup("refactor"+refactRandom);
             var text = '<xml xmlns="http://www.w3.org/1999/xhtml"><variables></variables><block type="data_variable" id="'+generateRandomID()+'" x="481" y="88"><field name="VARIABLE" id="'+newVariableId+'" variabletype="">'+newVariableName+'</field></block></xml>';
             var xml = Blockly.Xml.textToDom(text);
             var newVarId = Blockly.Xml.domToWorkspace(xml, workspace)[0];
@@ -479,6 +516,7 @@ const handleDuplicateExpr = function (response, workspace) {
 
 
             for(i=1;i<smell.noOfGroups;i++) {
+                Blockly.setGroup("refactor"+refactRandom);
                 var exprBlock = workspace.getBlockById(smell.groups[i].exprBlock);
                 var parentBlock = exprBlock.getParent();
                 exprBlock.dispose();
@@ -491,7 +529,9 @@ const handleDuplicateExpr = function (response, workspace) {
             }
             workspace.removeHighlightBox();
             workspace.getFlyout().removeHighlightBox();
-            workspace.toolbox_.refreshSelection();
+            workspace.refreshToolboxSelection_();
+            workspace.cleanUp();
+            Blockly.setGroup(false);
             mixpanel.track("Duplicate Expression Refactoring Done");
             showEditMsg(workspace, newBlockId, 1, 1, newVariables);
         };

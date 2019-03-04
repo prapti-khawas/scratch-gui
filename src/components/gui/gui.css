@@ -8,7 +8,7 @@
 
 .body-wrapper {
     height: calc(100% - $menu-bar-height);
-    background-color: $ui-primary;
+    background-color: hsla(41, 97%, 64%, 0.54);/*$ui-primary;*/
 }
 
 .body-wrapper * {
@@ -48,15 +48,16 @@
     height: fit-content; 
     position: absolute; 
     z-index: 100; 
-    border: 2px solid #4c97ff; 
+    border: 2px solid #ffb300; 
     border-radius: 10px; 
     -moz-border-radius: 15px;
     display: none;
     top: 55px;
+    left: 500px;
 }
 
 .hints-header {
-    background-color: #4c97ff;
+    background-color: #ffb300;
     cursor: move;
     border-radius: 8px 9px 0px 0px;
     position: absolute;
@@ -92,8 +93,8 @@
 
 .left-button {
     float:  left;
-    border:  2px solid #4c97ff;
-    background-color:  #4c97ff;
+    border:  2px solid #ffb300;
+    background-color:  #ffb300;
     color:  whitesmoke;
     padding: 10px 25px 10px 25px;
     margin-top:  2px;
@@ -101,14 +102,14 @@
 }
 
 .left-button:hover {
-    background-color: #3373cc;
-    border:  2px solid #3373cc;
+    background-color: #d29723;
+    border:  2px solid #d29723;
 }
 
 .right-button {
     float:  right;
-    border:  2px solid #4c97ff;
-    background-color:  #4c97ff;
+    border:  2px solid #ffb300;
+    background-color:  #ffb300;
     color:  whitesmoke;
     padding: 10px 25px 10px 25px;
     margin-top:  2px;
@@ -116,8 +117,8 @@
 }
 
 .right-button:hover {
-    background-color: #3373cc;
-    border:  2px solid #3373cc;
+    background-color: #d29723;
+    border:  2px solid #d29723;
 }
 
 .hints-button-wrapper {
@@ -143,8 +144,23 @@
 }
 
 .hints-button button.yellow-button {
-    background-color: #ffb300; 
-    border: 2px solid #ffb300;
+    background-color: #0fbd8c; 
+    border: 2px solid #0fbd8c;
+}
+
+.tweak-button {
+    height: 32px;
+    padding: 5px;
+    width:  32px;
+    top: 5rem;
+    right: 1.55rem;
+    position: absolute;
+    cursor: pointer;
+    -webkit-user-select: none;
+}
+
+.tweak-button:hover {
+    transform: scale(1.2);
 }
 
 
@@ -175,7 +191,7 @@
     padding: 0.125rem 1.25rem 0;
     font-size: 0.75rem;
 
-    background-color: $ui-tertiary;
+    background-color: hsl(40, 89%, 67%); /*$ui-tertiary;*/
     color: $text-primary-transparent;
 
     display: flex;
@@ -214,7 +230,7 @@
 }
 
 .tab:hover {
-  background-color: $ui-primary;
+  background-color: hsl(40, 94%, 50%); /*$ui-primary;*/
 }
 
 .tab.is-selected {

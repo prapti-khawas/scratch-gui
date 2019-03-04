@@ -27,7 +27,7 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: .75rem;
     font-weight: bold;
-    background-color: $motion-primary;
+    background-color: hsl(40, 95%, 57%);/*$motion-primary;*/
     color: $ui-white;
 }
 

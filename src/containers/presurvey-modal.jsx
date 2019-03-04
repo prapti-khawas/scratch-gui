@@ -8,7 +8,8 @@ import PresurveyModalComponent from '../components/presurvey-modal/presurvey-mod
 import {
     closePresurvey,
     openPreviewInfo,
-    openLoginInfo
+    openLoginInfo,
+    openTutorial
 } from '../reducers/modals';
 
 const SERVER_URL = 'https://userdataservice.cfapps.io/'
@@ -34,7 +35,7 @@ class PresurveyModal extends React.Component {
                 if (event.data === 'closeQSIWindow') {
                     console.log(event);
                     const token = sessionStorage.getItem("jwt");
-                    localStorage.setItem("survey","completed");
+                    localStorage.setItem("presurvey","completed");
                     this.props.onDone();
                 }
         }
@@ -57,7 +58,7 @@ class PresurveyModal extends React.Component {
 
     componentDidMount () {
         if (this.props.onDone) window.addEventListener("message", this.handleDone);
-        if (localStorage.getItem("survey") == "completed") this.props.onDone();
+        if (localStorage.getItem("presurvey") == "completed") this.props.onDone();
     }
 
     componentWillUnmount () {
@@ -83,6 +84,7 @@ const mapDispatchToProps = dispatch => ({
     },
     onDone: () => {
         dispatch(closePresurvey());
+        dispatch(openTutorial());
     }
 });
 

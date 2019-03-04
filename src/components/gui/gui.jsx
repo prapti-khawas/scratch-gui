@@ -27,6 +27,7 @@ import PreviewModal from '../../containers/preview-modal.jsx';
 import LoginModal from '../../containers/login-modal.jsx';      
 import PresurveyModal from '../../containers/presurvey-modal.jsx';
 import PostsurveyModal from '../../containers/postsurvey-modal.jsx';
+import TutorialModal from '../../containers/tutorial-modal.jsx';
 import ImportModal from '../../containers/import-modal.jsx';
 import WebGlModal from '../../containers/webgl-modal.jsx';
 import TipsLibrary from '../../containers/tips-library.jsx';
@@ -38,11 +39,15 @@ import ConnectionModal from '../../containers/connection-modal.jsx';
 import layout, {STAGE_SIZE_MODES} from '../../lib/layout-constants';
 import {resolveStageSize} from '../../lib/screen-utils';
 
+import {checkCode} from '../../reducers/improvable'
+
 import styles from './gui.css';
 import addExtensionIcon from './icon--extensions.svg';
 import codeIcon from './icon--code.svg';
 import costumesIcon from './icon--costumes.svg';
 import soundsIcon from './icon--sounds.svg';
+import tweakIcon from '../../lib/assets/icon--spanner.png';
+import loadingIcon from '../../lib/assets/white_loading.gif';
 
 const messages = defineMessages({
     addExtension: {
@@ -80,6 +85,7 @@ const GUIComponent = props => {
         loginInfoVisible,       
         presurveyVisible,
         postsurveyVisible,
+        tutorialVisible,
         intl,
         isPlayerOnly,
         isRtl,
@@ -147,6 +153,9 @@ const GUIComponent = props => {
             >
                 {loginInfoVisible ? (
                     <LoginModal />
+                ) : null}
+                {tutorialVisible ? (
+                    <TutorialModal />
                 ) : null}
                 {presurveyVisible ? (
                     <PresurveyModal />
@@ -301,6 +310,19 @@ const GUIComponent = props => {
                                     <Box className={styles.watermark}>
                                         <Watermark />
                                     </Box>
+                                    <img
+                                        id="tweak_button"
+                                        className={styles.tweakButton}
+                                        draggable={false}
+                                        src={tweakIcon}
+                                        onClick={checkCode}
+                                    />
+                                    <img
+                                        id="loading"
+                                        className={styles.tweakButton}
+                                        draggable={false}
+                                        src={loadingIcon}
+                                    />
                                 </TabPanel>
                                 <TabPanel className={tabClassNames.tabPanel}>
                                     {costumesTabVisible ? <CostumeTab vm={vm} /> : null}
@@ -373,6 +395,7 @@ GUIComponent.propTypes = {
     loginInfoVisible: PropTypes.bool,       
     presurveyVisible: PropTypes.bool,
     postsurveyVisible: PropTypes.bool,
+    tutorialVisible: PropTypes.bool,
     intl: intlShape.isRequired,
     isPlayerOnly: PropTypes.bool,
     isRtl: PropTypes.bool,
